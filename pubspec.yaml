@@ -59,6 +59,8 @@ dependencies:
   app_tracking_transparency: ^2.0.3
   upgrader: ^5.0.0
   in_app_review: ^2.0.6
+  flutter_dotenv: ^5.0.2
+
 
   
    
@@ -97,6 +99,7 @@ flutter:
     - assets/svg/
     - fonts/
     - documents/
+    - .env
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

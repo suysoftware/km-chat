@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:one_km/src/bloc/km_system_settings_cubit.dart';
 import 'package:one_km/src/bloc/km_user_cubit.dart';
@@ -53,12 +54,13 @@ Future<void> main() async {
 
 Future<void> init() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-   options: FirebaseOptionsClass.firebaseConfig);
+  await Firebase.initializeApp(options: FirebaseOptionsClass.firebaseConfig);
   await FirebaseAuthService.loggedCheck().then((value) => kmUser = value);
   await FirestoreOperations.kmSystemSettingsGetter()
       .then((value) => systemSettings = value);
   await appTracking();
+  await dotenv.load(fileName: ".env");
+  
 }
 
 class KmApp extends StatelessWidget {

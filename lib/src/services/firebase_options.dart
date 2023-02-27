@@ -1,13 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class FirebaseOptionsClass {
-  static const FirebaseOptions firebaseConfig = FirebaseOptions(
-      apiKey: "AIzaSyC6C6ABYzrYvYtcAzogxWZK2Y4dYvYf2RU",
-      authDomain: "",
-      projectId: "kmproject-ef6c1",
-      storageBucket: "",
-      messagingSenderId: "597378728713",
-      appId: "1:597378728713:ios:60d5696bf59bac471e89d8",
+  static  FirebaseOptions firebaseConfig = FirebaseOptions(
+      apiKey: dotenv.env['API_KEY'].toString(),
+      authDomain: dotenv.env['AUTH_DOMAIN'].toString(),
+      projectId: dotenv.env['PROJECT_ID'].toString(),
+      storageBucket: dotenv.env['STORAGE_BUCKET'].toString(),
+      messagingSenderId: dotenv.env['MESSAGING_SENDER_ID'].toString(),
+      appId: dotenv.env['APP_ID'].toString(),
       measurementId: "");
 
       
