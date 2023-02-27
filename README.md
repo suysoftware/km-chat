@@ -1,16 +1,20 @@
-# one_km
+# 1 KM CHAT
 
-A new Flutter project.
+Start chatting with people around 1 KM you already know, as well as people you want to meet. Just relax, you are anonymous
 
-## Getting Started
+![Logo](https://i.ibb.co/yFQhWfw/Dynamic-gentis-logo.png)
 
-This project is a starting point for a Flutter application.
+    
+## Ekran Görüntüleri
 
-A few resources to get you started if this is your first Flutter project:
+![Uygulama Ekran Görüntüsü](https://firebasestorage.googleapis.com/v0/b/kmproject-ef6c1.appspot.com/o/for_github%2F1km%20group.png?alt=media&token=4b9f2ad6-15b6-4204-9489-abede2ee5216)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
+
+
+## Kullanılan Teknolojiler
+
+Flutter, Node.js, Cloud Functions, Cloud Firestore
+
+
