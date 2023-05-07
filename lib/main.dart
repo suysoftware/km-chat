@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:one_km/src/bloc/km_system_settings_cubit.dart';
 import 'package:one_km/src/bloc/km_user_cubit.dart';
 import 'package:one_km/src/screens/login_screen.dart';
@@ -23,11 +24,9 @@ bool isLogged = false;
 var kmUser;
 var systemSettings;
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 Future<void> appTracking() async {
-  if (await AppTrackingTransparency.trackingAuthorizationStatus ==
-      TrackingStatus.notDetermined) {
+  if (await AppTrackingTransparency.trackingAuthorizationStatus == TrackingStatus.notDetermined) {
     // Show a custom explainer dialog before the system dialog
     //  await showCustomTrackingDialog(context);
     // Wait for dialog popping animation
@@ -54,13 +53,11 @@ Future<void> main() async {
 
 Future<void> init() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(options: FirebaseOptionsClass.firebaseConfig);
   await FirebaseAuthService.loggedCheck().then((value) => kmUser = value);
-  await FirestoreOperations.kmSystemSettingsGetter()
-      .then((value) => systemSettings = value);
+  await FirestoreOperations.kmSystemSettingsGetter().then((value) => systemSettings = value);
   await appTracking();
-  await dotenv.load(fileName: ".env");
-  
 }
 
 class KmApp extends StatelessWidget {
@@ -93,14 +90,12 @@ class _cupertinoApp extends StatefulWidget {
   State<_cupertinoApp> createState() => __cupertinoAppState();
 }
 
-class __cupertinoAppState extends State<_cupertinoApp>
-    with WidgetsBindingObserver {
+class __cupertinoAppState extends State<_cupertinoApp> with WidgetsBindingObserver {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   Future<void> _firebaseMessagingOnMessageHandler(RemoteMessage message) async {
     RemoteNotification? notification = message.notification;
-    messaging.setForegroundNotificationPresentationOptions(
-        alert: false, badge: false, sound: false);
+    messaging.setForegroundNotificationPresentationOptions(alert: false, badge: false, sound: false);
 //uygulamada iken
   }
 
@@ -111,6 +106,7 @@ class __cupertinoAppState extends State<_cupertinoApp>
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addObserver(this);
     if (systemSettings != null) {
       context.read<KmSystemSettingsCubit>().changeSettings(systemSettings);
@@ -120,8 +116,7 @@ class __cupertinoAppState extends State<_cupertinoApp>
       context.read<KmUserCubit>().changeUser(kmUser);
 
       FirebaseMessaging.onMessage.listen(_firebaseMessagingOnMessageHandler);
-      FirebaseMessaging.onMessageOpenedApp
-          .listen(_firebaseMessagingOpenedAppHandler);
+      FirebaseMessaging.onMessageOpenedApp.listen(_firebaseMessagingOpenedAppHandler);
     } else {
       isLogged = false;
     }
@@ -194,21 +189,21 @@ class __cupertinoAppState extends State<_cupertinoApp>
     return CupertinoApp(
       color: CupertinoColors.activeGreen,
       routes: {
-        "/": (BuildContext context) =>
-            isLogged == false ? const LoginScreen() : const ChatScreen(),
+        "/": (BuildContext context) => isLogged == false ? const LoginScreen() : const ChatScreen(),
         "/Login": (BuildContext context) => const LoginScreen(),
         "/Chat": (BuildContext context) => const ChatScreen(),
       },
       debugShowCheckedModeBanner: false,
       theme: const CupertinoThemeData(
+          brightness: Brightness.dark,
           textTheme: CupertinoTextThemeData(
               textStyle: TextStyle(
-        color: ColorConstants.designGreen,
-        fontFamily: "Coderstyle",
-        fontSize: 24,
-        letterSpacing: 0.3,
-        wordSpacing: 0.03,
-      ))),
+            color: ColorConstants.designGreen,
+            fontFamily: "Coderstyle",
+            fontSize: 24,
+            letterSpacing: 0.3,
+            wordSpacing: 0.03,
+          ))),
     );
   }
 }

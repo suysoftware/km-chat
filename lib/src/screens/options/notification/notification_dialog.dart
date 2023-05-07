@@ -17,20 +17,13 @@ class NotificationDialog extends StatefulWidget {
 class _NotificationDialogState extends State<NotificationDialog> {
   bool publicSwitchValue = false;
   bool privateSwitchValue = false;
-
+  bool clubSwitchValue = false;
   @override
   void initState() {
     super.initState();
-    publicSwitchValue = context
-        .read<KmUserCubit>()
-        .state
-        .userNotificationSettings
-        .publicMessage;
-    privateSwitchValue = context
-        .read<KmUserCubit>()
-        .state
-        .userNotificationSettings
-        .privateMessage;
+    publicSwitchValue = context.read<KmUserCubit>().state.userNotificationSettings.publicMessage;
+    privateSwitchValue = context.read<KmUserCubit>().state.userNotificationSettings.privateMessage;
+    clubSwitchValue = context.read<KmUserCubit>().state.userNotificationSettings.clubMessage;
   }
 
   @override
@@ -59,48 +52,54 @@ class _NotificationDialogState extends State<NotificationDialog> {
               SizedBox(
                 height: 5.h,
               ),
-              notificationSwitch(publicSwitchValue, true),
+              notificationSwitch(publicSwitchValue, "Public"),
               SizedBox(
                 height: 2.h,
               ),
-              notificationSwitch(privateSwitchValue, false)
+              notificationSwitch(privateSwitchValue, "Private"),
+              SizedBox(
+                height: 2.h,
+              ),
+              notificationSwitch(clubSwitchValue, "Club")
             ],
           ),
         ));
   }
 
-  Widget notificationSwitch(bool switchValue, bool isPublic) {
+  Widget notificationSwitch(bool switchValue, String notificationType) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(isPublic ? 'Public ' : 'Private'),
+        Text(notificationType),
         SizedBox(
           width: 10.w,
         ),
         CupertinoSwitch(
           value: switchValue,
-          onChanged: (value) async {
-            var requestResult =
-                await FirestoreOperations.kmUserNotificationSettingUpdate(
-                    context.read<KmUserCubit>().state, isPublic, value);
-            if (requestResult) {
-              if (isPublic && requestResult) {
-                setState(() {
-                  context
-                      .read<KmUserCubit>()
-                      .notificationSettingChange(privateSwitchValue, value);
-                  publicSwitchValue = value;
-                });
-              } else if (isPublic != true && requestResult) {
-                setState(() {
-                     context
-                      .read<KmUserCubit>()
-                      .notificationSettingChange(value, publicSwitchValue);
-                  privateSwitchValue = value;
-                });
-              }
+          onChanged: (value) {
+            if (notificationType == "Public") {
+              setState(() {
+                publicSwitchValue = value;
+              });
+            } else if (notificationType == "Private") {
+              setState(() {
+                privateSwitchValue = value;
+              });
+            } else if (notificationType == "Club") {
+              setState(() {
+                clubSwitchValue = value;
+              });
             }
+            FirestoreOperations.kmUserNotificationSettingUpdate(context.read<KmUserCubit>().state, notificationType, value).then((requestResult) {
+              if (notificationType == "Public") {
+                context.read<KmUserCubit>().notificationSettingPublicChange(value);
+              } else if (notificationType == "Private") {
+                context.read<KmUserCubit>().notificationSettingPrivateChange(value);
+              } else if (notificationType == "Club") {
+                context.read<KmUserCubit>().notificationSettingClubChange(value);
+              }
+            });
           },
           activeColor: ColorConstants.designGreen,
           trackColor: ColorConstants.systemColor,

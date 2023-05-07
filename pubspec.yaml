@@ -42,10 +42,6 @@ dependencies:
   connectivity_plus: ^3.0.2
   geolocator: ^9.0.2
   geocoding: ^2.0.5
-  firebase_auth: ^4.2.0
-  firebase_core: ^2.4.0
-  firebase_analytics: ^10.0.7
-  cloud_firestore: ^4.2.0
   http: ^0.13.5
   uuid: ^3.0.7
   flutter_bloc: ^8.1.1
@@ -60,6 +56,10 @@ dependencies:
   upgrader: ^5.0.0
   in_app_review: ^2.0.6
   flutter_dotenv: ^5.0.2
+  firebase_auth: ^4.5.0
+  firebase_core: ^2.11.0
+  firebase_analytics: ^10.3.0
+  cloud_firestore: ^4.6.0
 
 
   
@@ -137,6 +137,11 @@ flutter:
     - family: Noscefont
       fonts:
         - asset: fonts/NosceFont.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+    - family: WhiteRabbit
+      fonts:
+        - asset: fonts/WhiteRabbit.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #

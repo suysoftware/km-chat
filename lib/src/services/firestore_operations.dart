@@ -1,7 +1,11 @@
 // ignore_for_file: prefer_typing_uninitialized_variables, duplicate_ignore, prefer_is_empty
 
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:one_km/src/models/km_chat_message.dart';
@@ -21,9 +25,7 @@ class FirestoreOperations {
     final kmUserRef = FirebaseFirestore.instance
         .collection('users')
         .doc(userUid)
-        .withConverter(
-            fromFirestore: (snapshot, _) => KmUser.fromJson(snapshot.data()!),
-            toFirestore: (kmuser, _) => kmuser.toJson());
+        .withConverter(fromFirestore: (snapshot, _) => KmUser.fromJson(snapshot.data()!), toFirestore: (kmuser, _) => kmuser.toJson());
     kmUser = await kmUserRef.get();
 
     return kmUser.data();
@@ -35,8 +37,7 @@ class FirestoreOperations {
 
       geoLocation = await getLocation();
 
-      final kmUserRef =
-          FirebaseFirestore.instance.collection('users').doc(userUid);
+      final kmUserRef = FirebaseFirestore.instance.collection('users').doc(userUid);
 
       await kmUserRef.update({
         "user_coordinates": geoLocation.toJson(),
@@ -46,18 +47,16 @@ class FirestoreOperations {
     } catch (e) {}
   }
 
-  static Future<bool> kmUserNotificationSettingUpdate(
-      KmUser kmUser, bool isPublic, bool changeIsTrue) async {
+  static Future<bool> kmUserNotificationSettingUpdate(KmUser kmUser, String notificationType, bool changeIsTrue) async {
     var payLoad;
     payLoad = {
       "user_no": kmUser.userUid,
       "user_secret_password": kmUser.userSecretPassword,
-      "target_notification": isPublic ? "public_message" : "private_message",
+      "target_notification": "${notificationType.toLowerCase()}_message",
       "change_is_true": changeIsTrue.toString()
     };
 
-    var response = await apiRequest(
-        RestApiConstants.API_LINK_NOTIFICATION_SETTING_UPDATE, payLoad);
+    var response = await apiRequest(RestApiConstants.API_LINK_NOTIFICATION_SETTING_UPDATE, payLoad);
 
     if (response) {
       // print('COMPLETE (noti change request)');
@@ -72,8 +71,7 @@ class FirestoreOperations {
   static Future<KmUser> createNewUser(KmUser kmUser) async {
     var uuid = const Uuid();
     var userSecretPassword = uuid.v1();
-    final kmUserRef =
-        FirebaseFirestore.instance.collection('users').doc(kmUser.userUid);
+    final kmUserRef = FirebaseFirestore.instance.collection('users').doc(kmUser.userUid);
 
     var kmUserReturn;
     var geoLocation;
@@ -82,22 +80,13 @@ class FirestoreOperations {
 
     geoLocation = await getLocation();
 
-    await kmUserRef.update({
-      "user_coordinates": geoLocation.toJson(),
-      "user_name": kmUser.userName,
-      "user_secret_password": userSecretPassword,
-      "user_message_token": token ?? ""
-    });
-    kmUserReturn = await kmUserRef
-        .withConverter(
-            fromFirestore: (snapshot, _) => KmUser.fromJson(snapshot.data()!),
-            toFirestore: (kmuser, _) => kmuser.toJson())
-        .get();
+    await kmUserRef.update({"user_coordinates": geoLocation.toJson(), "user_name": kmUser.userName, "user_secret_password": userSecretPassword, "user_message_token": token ?? ""});
+    kmUserReturn = await kmUserRef.withConverter(fromFirestore: (snapshot, _) => KmUser.fromJson(snapshot.data()!), toFirestore: (kmuser, _) => kmuser.toJson()).get();
 
     return kmUserReturn.data();
   }
 
-  static Future<UserCoordinates> getLocation() async {
+  static Future<UserCoordinates?> getLocation() async {
     var location;
 
     try {
@@ -113,9 +102,7 @@ class FirestoreOperations {
     double longitude = location.longitude;
     var userPlaceMark;
 
-    await placemarkFromCoordinates(latitude, longitude,
-            localeIdentifier: 'en_US')
-        .then((value) => userPlaceMark = value[0]);
+    await placemarkFromCoordinates(latitude, longitude, localeIdentifier: 'en_US').then((value) => userPlaceMark = value[0]);
 
     var userGeo = UserCoordinates(
       latitude: latitude,
@@ -130,13 +117,35 @@ class FirestoreOperations {
     return userGeo;
   }
 
+  static Future<void> sendMessageToPublic(String userMessage, KmUser kmUser, bool publicNotification, KmSystemSettings kmSystemSettings) async {
+    int spaceValue = 0;
+    if (userMessage.length < 1 || userMessage.length - spaceValue <= spaceValue) {
+      return;
+    }
+    for (var i = 0; i < userMessage.length; i++) {
+      if (userMessage[i] == " ") {
+        spaceValue = spaceValue + 1;
+      }
+    }
+
+    var canSendNotification = publicNotification ? "yes" : "no";
+
+    var payLoad;
+    payLoad = {
+      "can_send_notification": canSendNotification,
+      "user_message": userMessage,
+      "system_chat_setting": kmSystemSettings.chatDistance,
+      "km_user": jsonEncode(kmUser.toJson()),
+    };
+    try {
+      await apiRequest(RestApiConstants.API_LINK_SEND_MESSAGE_TO_PUBLIC, payLoad);
+    } catch (e) {
+      print(e);
+    }
+  }
+
   static Future<bool> sendMessageToChat(
-      String userMessage,
-      KmUser kmUserForMessage,
-      KmSystemSettings kmSystemSettings,
-      String privateMessageTarget,
-      String privateMessage,
-      bool publicNotification) async {
+      String userMessage, KmUser kmUserForMessage, KmSystemSettings kmSystemSettings, String privateMessageTarget, String privateMessage, bool publicNotification) async {
     bool isPrivate = privateMessageTarget != "" ? true : false;
 
     int spaceValue = 0;
@@ -167,35 +176,28 @@ class FirestoreOperations {
       }
     }
 
-    var userBlockedConvertList;
-    userBlockedConvertList =
-        await BasicGetters.blockedMapToList(kmUserForMessage.userBlockedMap);
+    var userBlockedConvertList = kmUserForMessage.userBlockedMap.keys.toList();
 
     try {
       var kmChatMessage = KmChatMessage(
           userMessage: isPrivate ? privateMessage : userMessage,
-          userMessageTime: Timestamp.fromMillisecondsSinceEpoch(
-              DateTime.now().millisecondsSinceEpoch),
+          userMessageTime: Timestamp.fromMillisecondsSinceEpoch(DateTime.now().millisecondsSinceEpoch),
           userTitle: kmUserForMessage.userTitle,
           userName: kmUserForMessage.userName,
           userLevel: kmUserForMessage.userLevel,
           userBlockedList: userBlockedConvertList,
           userUid: kmUserForMessage.userUid,
           userAvatar: kmUserForMessage.userAvatar,
-          messageIsPrivate: isPrivate,
-          privateMessageTarget: privateMessageTarget);
+          userClubs: []);
 
-      var chatRef = BasicGetters.chatStreamReferenceGetter(
-          kmUserForMessage.userCoordinates, kmSystemSettings);
+      var chatRef = BasicGetters.chatStreamReferenceGetter(kmUserForMessage.userCoordinates, kmSystemSettings);
 
       await chatRef.add(kmChatMessage);
 
       if (isPrivate) {
-        FirestoreOperations.notificationRequest(kmUserForMessage,
-            privateMessageTarget, privateMessage, kmSystemSettings);
+        FirestoreOperations.notificationRequest(kmUserForMessage, privateMessageTarget, privateMessage, kmSystemSettings);
       } else if (publicNotification) {
-        FirestoreOperations.notificationRequest(
-            kmUserForMessage, 'notarget', userMessage, kmSystemSettings);
+        FirestoreOperations.notificationRequest(kmUserForMessage, 'notarget', userMessage, kmSystemSettings);
       }
 
       return true;
@@ -209,18 +211,14 @@ class FirestoreOperations {
     final settingsRef = FirebaseFirestore.instance
         .collection('system')
         .doc('system_settings')
-        .withConverter(
-            fromFirestore: (snapshot, _) =>
-                KmSystemSettings.fromJson(snapshot.data()!),
-            toFirestore: (kmsetting, _) => kmsetting.toJson());
+        .withConverter(fromFirestore: (snapshot, _) => KmSystemSettings.fromJson(snapshot.data()!), toFirestore: (kmsetting, _) => kmsetting.toJson());
 
     systemSettings = await settingsRef.get();
 
     return systemSettings.data();
   }
 
-  static Future<bool> joinRoomRequest(
-      KmUser kmUser, KmSystemSettings kmSystemSettings) async {
+  static Future<bool> joinRoomRequest(KmUser kmUser, KmSystemSettings kmSystemSettings) async {
     var payLoad;
 
     payLoad = {
@@ -233,8 +231,7 @@ class FirestoreOperations {
       "user_postal": kmUser.userCoordinates.postalCode,
     };
 
-    var response =
-        await apiRequest(RestApiConstants.API_LINK_JOIN_ROOM_MESSAGE, payLoad);
+    var response = await apiRequest(RestApiConstants.API_LINK_JOIN_ROOM_MESSAGE, payLoad);
 
     if (response) {
       //print('COMPLETE (join room request)');
@@ -246,8 +243,7 @@ class FirestoreOperations {
     }
   }
 
-  static Future<bool> spamRequest(KmUser kmUser, String targetName,
-      String targetUid, String targetMessage) async {
+  static Future<bool> spamRequest(KmUser kmUser, String targetName, String targetUid, String targetMessage) async {
     var payLoad;
     payLoad = {
       "user_no": kmUser.userUid,
@@ -257,8 +253,7 @@ class FirestoreOperations {
       "target_message": targetMessage,
     };
 
-    var response =
-        await apiRequest(RestApiConstants.API_LINK_SPAM_TARGET, payLoad);
+    var response = await apiRequest(RestApiConstants.API_LINK_SPAM_TARGET, payLoad);
 
     if (response) {
       //print('COMPLETE (spam request)');
@@ -278,8 +273,7 @@ class FirestoreOperations {
       "target_uid": targetUid,
     };
 
-    var response =
-        await apiRequest(RestApiConstants.API_LINK_SPAM_REMOVE, payLoad);
+    var response = await apiRequest(RestApiConstants.API_LINK_SPAM_REMOVE, payLoad);
 
     if (response) {
       //print('COMPLETE (spam remove)');
@@ -291,16 +285,14 @@ class FirestoreOperations {
     }
   }
 
-  static Future<bool> avatarChangeRequest(
-      KmUser kmUser, String chosenAvatar) async {
+  static Future<bool> avatarChangeRequest(KmUser kmUser, String chosenAvatar) async {
     var payLoad;
     payLoad = {
       "user_no": kmUser.userUid,
       "user_secret_password": kmUser.userSecretPassword,
       "chosen_avatar": chosenAvatar,
     };
-    var response =
-        await apiRequest(RestApiConstants.API_LINK_AVATAR_CHANGE, payLoad);
+    var response = await apiRequest(RestApiConstants.API_LINK_AVATAR_CHANGE, payLoad);
 
     if (response) {
       //print('COMPLETE (avatar change)');
@@ -312,8 +304,7 @@ class FirestoreOperations {
     }
   }
 
-  static Future<bool> accountReviveRequest(
-      KmUser kmUser, String reviveSecretPassword) async {
+  static Future<bool> accountReviveRequest(KmUser kmUser, String reviveSecretPassword) async {
     if (kmUser.userSecretPassword == reviveSecretPassword) {
       return false;
     }
@@ -323,8 +314,7 @@ class FirestoreOperations {
       "user_secret_password": reviveSecretPassword,
     };
 
-    var response =
-        await apiRequest(RestApiConstants.API_LINK_ACCOUNT_REVIVE, payLoad);
+    var response = await apiRequest(RestApiConstants.API_LINK_ACCOUNT_REVIVE, payLoad);
 
     if (response) {
       //print('COMPLETE (revive request)');
@@ -336,14 +326,9 @@ class FirestoreOperations {
     }
   }
 
-  static Future<void> activityControl(
-      KmUser kmUser, String activityType) async {
+  static Future<void> activityControl(KmUser kmUser, String activityType) async {
     var payLoad;
-    payLoad = {
-      "user_no": kmUser.userUid,
-      "user_secret_password": kmUser.userSecretPassword,
-      "activity_type": activityType
-    };
+    payLoad = {"user_no": kmUser.userUid, "user_secret_password": kmUser.userSecretPassword, "activity_type": activityType};
 
     await apiRequest(RestApiConstants.API_LINK_ACTIVITY_REQUEST, payLoad);
 
@@ -357,11 +342,7 @@ class FirestoreOperations {
     }*/
   }
 
-  static Future<void> notificationRequest(
-      KmUser kmUser,
-      String privateMessageTarget,
-      String privateMessageText,
-      KmSystemSettings kmSystemSettings) async {
+  static Future<void> notificationRequest(KmUser kmUser, String privateMessageTarget, String privateMessageText, KmSystemSettings kmSystemSettings) async {
     var payLoad;
     payLoad = {
       "user_no": kmUser.userUid,
@@ -375,8 +356,7 @@ class FirestoreOperations {
       "private_message_text": privateMessageText
     };
 
-    var response = await apiRequest(
-        RestApiConstants.API_LINK_NOTIFICATION_SENDER, payLoad);
+    var response = await apiRequest(RestApiConstants.API_LINK_NOTIFICATION_SENDER, payLoad);
 
     if (response) {
       //print('COMPLETE notification');
@@ -395,7 +375,7 @@ class FirestoreOperations {
         "user_message_token": token,
       };
 
-     await apiRequest(RestApiConstants.API_LINK_TOKEN_UPDATE_REQUEST, payLoad);
+      await apiRequest(RestApiConstants.API_LINK_TOKEN_UPDATE_REQUEST, payLoad);
     }
   }
 
@@ -410,9 +390,8 @@ class FirestoreOperations {
     String token = secureToken.toString();
     var requestHeaders = {'Authorization': 'Bearer $token'};
 
-    var response =
-        await client.put(uriIE, body: payLoad, headers: requestHeaders);
-
+    var response = await client.put(uriIE, body: payLoad, headers: requestHeaders);
+    print(response.statusCode);
     if (response.statusCode == 200) {
       return true;
     } else {

@@ -12,57 +12,45 @@ import 'package:vibration/vibration.dart';
 import '../screens/options/profile/profile_dialog.dart';
 
 class BasicGetters {
-  static CollectionReference<KmChatMessage> chatStreamReferenceGetter(
-      UserCoordinates userCoordinates, KmSystemSettings kmSystemSettings) {
+  static CollectionReference<KmChatMessage> chatStreamReferenceGetter(UserCoordinates userCoordinates, KmSystemSettings kmSystemSettings) {
+    var collectionName = "public_chat";
     switch (kmSystemSettings.chatDistance) {
       case 'world':
         return FirebaseFirestore.instance
-            .collection('chat')
+            .collection(collectionName)
             .doc('WORLD')
             .collection('world_chat')
-            .withConverter(
-                fromFirestore: (snapshot, _) =>
-                    KmChatMessage.fromJson(snapshot.data()!),
-                toFirestore: (kmchat, _) => kmchat.toJson());
+            .withConverter(fromFirestore: (snapshot, _) => KmChatMessage.fromJson(snapshot.data()!), toFirestore: (kmchat, _) => kmchat.toJson());
 
       case 'country':
         return FirebaseFirestore.instance
-            .collection('chat')
+            .collection(collectionName)
             .doc(userCoordinates.isoCountryCode)
             .collection('country_chat')
-            .withConverter(
-                fromFirestore: (snapshot, _) =>
-                    KmChatMessage.fromJson(snapshot.data()!),
-                toFirestore: (kmchat, _) => kmchat.toJson());
+            .withConverter(fromFirestore: (snapshot, _) => KmChatMessage.fromJson(snapshot.data()!), toFirestore: (kmchat, _) => kmchat.toJson());
 
       case 'city':
         return FirebaseFirestore.instance
-            .collection('chat')
+            .collection(collectionName)
             .doc(userCoordinates.isoCountryCode)
             .collection('cities')
             .doc(userCoordinates.administrativeArea)
             .collection('city_chat')
-            .withConverter(
-                fromFirestore: (snapshot, _) =>
-                    KmChatMessage.fromJson(snapshot.data()!),
-                toFirestore: (kmchat, _) => kmchat.toJson());
+            .withConverter(fromFirestore: (snapshot, _) => KmChatMessage.fromJson(snapshot.data()!), toFirestore: (kmchat, _) => kmchat.toJson());
 
       case 'district':
         return FirebaseFirestore.instance
-            .collection('chat')
+            .collection(collectionName)
             .doc(userCoordinates.isoCountryCode)
             .collection('cities')
             .doc(userCoordinates.administrativeArea)
             .collection('districts')
             .doc(userCoordinates.locality)
             .collection('district_chat')
-            .withConverter(
-                fromFirestore: (snapshot, _) =>
-                    KmChatMessage.fromJson(snapshot.data()!),
-                toFirestore: (kmchat, _) => kmchat.toJson());
+            .withConverter(fromFirestore: (snapshot, _) => KmChatMessage.fromJson(snapshot.data()!), toFirestore: (kmchat, _) => kmchat.toJson());
       case 'postal':
         return FirebaseFirestore.instance
-            .collection('chat')
+            .collection(collectionName)
             .doc(userCoordinates.isoCountryCode)
             .collection('cities')
             .doc(userCoordinates.administrativeArea)
@@ -71,13 +59,10 @@ class BasicGetters {
             .collection('postals')
             .doc(userCoordinates.postalCode)
             .collection('postal_chat')
-            .withConverter(
-                fromFirestore: (snapshot, _) =>
-                    KmChatMessage.fromJson(snapshot.data()!),
-                toFirestore: (kmchat, _) => kmchat.toJson());
+            .withConverter(fromFirestore: (snapshot, _) => KmChatMessage.fromJson(snapshot.data()!), toFirestore: (kmchat, _) => kmchat.toJson());
       default:
         return FirebaseFirestore.instance
-            .collection('chat')
+            .collection(collectionName)
             .doc(userCoordinates.isoCountryCode)
             .collection('cities')
             .doc(userCoordinates.administrativeArea)
@@ -86,37 +71,22 @@ class BasicGetters {
             .collection('postals')
             .doc(userCoordinates.postalCode)
             .collection('postal_chat')
-            .withConverter(
-                fromFirestore: (snapshot, _) =>
-                    KmChatMessage.fromJson(snapshot.data()!),
-                toFirestore: (kmchat, _) => kmchat.toJson());
+            .withConverter(fromFirestore: (snapshot, _) => KmChatMessage.fromJson(snapshot.data()!), toFirestore: (kmchat, _) => kmchat.toJson());
     }
   }
 
-  static TextStyle chatTextStyleGetter(
-      KmChatMessage kmChatMessage, String myUid) {
-    if (kmChatMessage.messageIsPrivate &&
-        kmChatMessage.privateMessageTarget == myUid) {
-      return StyleConstants.privateMessageTextStyle;
-    } else if (kmChatMessage.messageIsPrivate &&
-        kmChatMessage.userUid == myUid) {
-      return StyleConstants.privateMessageTextStyle;
-    } else if (kmChatMessage.messageIsPrivate &&
-        kmChatMessage.privateMessageTarget != myUid) {
-      return StyleConstants.matrixtTextStyle;
-    } else {
-      switch (kmChatMessage.userTitle) {
-        case "system":
-          return StyleConstants.systemTextStyle;
-        case "admin":
-          return StyleConstants.adminTextStyle;
-        case "master":
-          return StyleConstants.masterTextStyle;
-        case "pleb":
-          return StyleConstants.plebTextStyle;
-        default:
-          return StyleConstants.plebTextStyle;
-      }
+  static TextStyle chatTextStyleGetter(KmChatMessage kmChatMessage, String myUid) {
+    switch (kmChatMessage.userTitle) {
+      case "system":
+        return StyleConstants.systemTextStyle;
+      case "admin":
+        return StyleConstants.adminTextStyle;
+      case "master":
+        return StyleConstants.masterTextStyle;
+      case "pleb":
+        return StyleConstants.plebTextStyle;
+      default:
+        return StyleConstants.plebTextStyle;
     }
   }
 
@@ -152,39 +122,30 @@ class BasicGetters {
     }
   }
 
-  static Future<List<KmChatMessage>> chatFilteredMessagesGetter(
-      dynamic kmChatList, KmUser myUserModel) async {
+  static Future<List<KmChatMessage>> chatFilteredMessagesGetter(dynamic kmChatList, KmUser myUserModel) async {
     var kmChatFilteredList = <KmChatMessage>[];
     var dateTime = DateTime.now().millisecondsSinceEpoch;
 
     for (var chatMessage in kmChatList.docs) {
-      if (!chatMessage.data().userBlockedList.contains(myUserModel.userUid) &&
-          myUserModel.userBlockedMap[chatMessage.data().userUid] == null) {
-        if (chatMessage.data().messageIsPrivate &&
+      if (!chatMessage.data().userBlockedList.contains(myUserModel.userUid) && myUserModel.userBlockedMap[chatMessage.data().userUid] == null) {
+      /*  if (chatMessage.data().messageIsPrivate &&
             chatMessage.data().privateMessageTarget == myUserModel.userUid &&
-            dateTime -
-                    chatMessage.data().userMessageTime.millisecondsSinceEpoch <
-                2000) {
+            dateTime - chatMessage.data().userMessageTime.millisecondsSinceEpoch < 2000) {
           Vibration.vibrate(duration: 40);
-        }
+        }*/
 
-        if (chatMessage.data().userTitle == "system" &&
-            dateTime -
-                    chatMessage.data().userMessageTime.millisecondsSinceEpoch >
-                30000) {
-                  // ignore: prefer_is_empty
-                  if(kmChatFilteredList.length<1){
-                        kmChatFilteredList.add(chatMessage.data());
-
-                  }
+        if (chatMessage.data().userTitle == "system" && dateTime - chatMessage.data().userMessageTime.millisecondsSinceEpoch > 30000) {
+          // ignore: prefer_is_empty
+          if (kmChatFilteredList.length < 1) {
+            kmChatFilteredList.add(chatMessage.data());
+          }
         } else {
           kmChatFilteredList.add(chatMessage.data());
         }
       }
     }
 
-    kmChatFilteredList
-        .sort((b, a) => a.userMessageTime.compareTo(b.userMessageTime));
+    kmChatFilteredList.sort((b, a) => a.userMessageTime.compareTo(b.userMessageTime));
 
     return kmChatFilteredList;
   }
@@ -195,29 +156,20 @@ class BasicGetters {
     return blockedList;
   }
 
-  static Widget textWidgetGetter(
-      KmChatMessage kmChatMessage, String myUid, BuildContext context) {
+  static Widget textWidgetGetter(KmChatMessage kmChatMessage, String myUid, BuildContext context) {
     return RichText(
         text: TextSpan(children: [
       TextSpan(
           recognizer: LongPressGestureRecognizer()
             ..onLongPress = () {
               HapticFeedback.vibrate();
-              if (kmChatMessage.userTitle != "system" &&
-                  kmChatMessage.userTitle != "admin" &&
-                  kmChatMessage.userUid != myUid) {
-                showCupertinoDialog(
-                    barrierDismissible: true,
-                    context: context,
-                    builder: (context) =>
-                        ProfileDialog(kmChatMessage: kmChatMessage));
+              if (kmChatMessage.userTitle != "system" && kmChatMessage.userTitle != "admin" && kmChatMessage.userUid != myUid) {
+                showCupertinoDialog(barrierDismissible: true, context: context, builder: (context) => ProfileDialog(kmChatMessage: kmChatMessage));
               }
             },
           text: "${kmChatMessage.userName}: ",
           style: chatNameStyleGetter(kmChatMessage)),
-      TextSpan(
-          text: kmChatMessage.userMessage,
-          style: chatTextStyleGetter(kmChatMessage, myUid)),
+      TextSpan(text: kmChatMessage.userMessage, style: chatTextStyleGetter(kmChatMessage, myUid)),
     ]));
   }
 }

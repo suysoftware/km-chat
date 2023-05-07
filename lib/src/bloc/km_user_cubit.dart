@@ -27,6 +27,7 @@ class KmUserCubit extends Cubit<KmUser> {
     newKmUser.userLastActivityDate = state.userLastActivityDate;
     newKmUser.userMessageToken = state.userMessageToken;
     newKmUser.userNotificationSettings = state.userNotificationSettings;
+    newKmUser.userClubs = state.userClubs;
 
     emit(newKmUser);
   }
@@ -56,6 +57,7 @@ class KmUserCubit extends Cubit<KmUser> {
     newKmUser.userLastActivityDate = state.userLastActivityDate;
     newKmUser.userMessageToken = state.userMessageToken;
     newKmUser.userNotificationSettings = state.userNotificationSettings;
+    newKmUser.userClubs = state.userClubs;
 
     emit(newKmUser);
   }
@@ -82,11 +84,12 @@ class KmUserCubit extends Cubit<KmUser> {
     newKmUser.userLastActivityDate = state.userLastActivityDate;
     newKmUser.userMessageToken = state.userMessageToken;
     newKmUser.userNotificationSettings = state.userNotificationSettings;
+    newKmUser.userClubs = state.userClubs;
 
     emit(newKmUser);
   }
 
-  void notificationSettingChange(bool private, bool public) {
+  void notificationSettingPublicChange(bool value) {
     var newKmUser = KmUser();
     newKmUser.userBlockedMap = state.userBlockedMap;
     newKmUser.userAvatar = state.userAvatar;
@@ -101,8 +104,49 @@ class KmUserCubit extends Cubit<KmUser> {
     newKmUser.userUid = state.userUid;
     newKmUser.userLastActivityDate = state.userLastActivityDate;
     newKmUser.userMessageToken = state.userMessageToken;
+    newKmUser.userClubs = state.userClubs;
     newKmUser.userNotificationSettings = UserNotificationSettings(
-        privateMessage: private, publicMessage: public);
+        privateMessage: state.userNotificationSettings.privateMessage, publicMessage: value, clubMessage: state.userNotificationSettings.clubMessage);
+    emit(newKmUser);
+  }
+    void notificationSettingPrivateChange(bool value) {
+    var newKmUser = KmUser();
+    newKmUser.userBlockedMap = state.userBlockedMap;
+    newKmUser.userAvatar = state.userAvatar;
+    newKmUser.userCoordinates = state.userCoordinates;
+    newKmUser.userExperiencePoints = state.userExperiencePoints;
+    newKmUser.userHasBanned = state.userHasBanned;
+    newKmUser.userIsOnline = state.userIsOnline;
+    newKmUser.userLevel = state.userLevel;
+    newKmUser.userName = state.userName;
+    newKmUser.userSecretPassword = state.userSecretPassword;
+    newKmUser.userTitle = state.userTitle;
+    newKmUser.userUid = state.userUid;
+    newKmUser.userLastActivityDate = state.userLastActivityDate;
+    newKmUser.userMessageToken = state.userMessageToken;
+    newKmUser.userClubs = state.userClubs;
+    newKmUser.userNotificationSettings = UserNotificationSettings(
+        privateMessage: value, publicMessage: state.userNotificationSettings.publicMessage, clubMessage: state.userNotificationSettings.clubMessage);
+    emit(newKmUser);
+  }
+    void notificationSettingClubChange(bool value) {
+    var newKmUser = KmUser();
+    newKmUser.userBlockedMap = state.userBlockedMap;
+    newKmUser.userAvatar = state.userAvatar;
+    newKmUser.userCoordinates = state.userCoordinates;
+    newKmUser.userExperiencePoints = state.userExperiencePoints;
+    newKmUser.userHasBanned = state.userHasBanned;
+    newKmUser.userIsOnline = state.userIsOnline;
+    newKmUser.userLevel = state.userLevel;
+    newKmUser.userName = state.userName;
+    newKmUser.userSecretPassword = state.userSecretPassword;
+    newKmUser.userTitle = state.userTitle;
+    newKmUser.userUid = state.userUid;
+    newKmUser.userLastActivityDate = state.userLastActivityDate;
+    newKmUser.userMessageToken = state.userMessageToken;
+    newKmUser.userClubs = state.userClubs;
+    newKmUser.userNotificationSettings = UserNotificationSettings(
+        privateMessage: state.userNotificationSettings.privateMessage, publicMessage: state.userNotificationSettings.publicMessage, clubMessage: value);
     emit(newKmUser);
   }
 }

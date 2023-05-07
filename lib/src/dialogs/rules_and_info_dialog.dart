@@ -10,8 +10,7 @@ class RulesAndInfoDialog extends StatelessWidget {
     Key? key,
     this.radius = 8,
     required this.mdFileName,
-  })  : assert(mdFileName.contains('.md'),
-            'The file must contain the .md extension'),
+  })  : assert(mdFileName.contains('.md'), 'The file must contain the .md extension'),
         super(key: key);
 
   final double radius;
@@ -27,7 +26,7 @@ class RulesAndInfoDialog extends StatelessWidget {
     return CupertinoPageScaffold(
       backgroundColor: ColorConstants.themeColor,
       child: FutureBuilder(
-        future: Future.delayed(const Duration(milliseconds: 150)).then((value) {
+        future: Future.delayed(const Duration(milliseconds: 40)).then((value) {
           return rootBundle.loadString('documents/$mdFileName');
         }),
         builder: (context, snapshot) {
@@ -38,10 +37,7 @@ class RulesAndInfoDialog extends StatelessWidget {
                   child: Markdown(
                     styleSheet: MarkdownStyleSheet(
                       pPadding: const EdgeInsets.all(8.0),
-                      p: TextStyle(
-                          color: ColorConstants.textColor,
-                          fontFamily: "CoderStyle",
-                          fontSize: 17.sp),
+                      p: TextStyle(color: ColorConstants.textColor, fontFamily: "WhiteRabbit", fontSize: 12.sp, wordSpacing: 1.4, letterSpacing: 1, height: 1.2),
                     ),
                     padding: EdgeInsets.fromLTRB(1.w, 7.h, 1.w, 5.h),
                     data: snapshot.data.toString(),

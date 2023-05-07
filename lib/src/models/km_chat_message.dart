@@ -22,8 +22,7 @@ class KmChatMessage {
   late List<dynamic> userBlockedList;
   late String userUid;
   late String userAvatar;
-  late bool messageIsPrivate;
-  late String privateMessageTarget;
+  late List<dynamic> userClubs;
 
   KmChatMessage(
       {required this.userMessage,
@@ -34,8 +33,7 @@ class KmChatMessage {
       required this.userBlockedList,
       required this.userUid,
       required this.userAvatar,
-      required this.messageIsPrivate,
-      required this.privateMessageTarget});
+      required this.userClubs});
 
   factory KmChatMessage.fromJson(Map<String, dynamic> json) => KmChatMessage(
       userMessage: json["user_message"],
@@ -46,8 +44,7 @@ class KmChatMessage {
       userBlockedList: json["user_blocked_list"],
       userUid: json["user_uid"],
       userAvatar: json["user_avatar"],
-      messageIsPrivate: json["message_is_private"],
-      privateMessageTarget: json["private_message_target"]);
+      userClubs: json["user_clubs"]);
 
   Map<String, dynamic> toJson() => {
         "user_message": userMessage,
@@ -58,7 +55,6 @@ class KmChatMessage {
         "user_blocked_list": userBlockedList,
         "user_uid": userUid,
         "user_avatar": userAvatar,
-        "message_is_private": messageIsPrivate,
-        "private_message_target": privateMessageTarget
+        "user_clubs": userClubs
       };
 }

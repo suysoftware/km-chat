@@ -29,6 +29,7 @@ class KmUser {
   late Timestamp userLastActivityDate;
   late String userMessageToken;
   late UserNotificationSettings userNotificationSettings;
+  late List<dynamic> userClubs;
 
   KmUser();
 
@@ -47,6 +48,7 @@ class KmUser {
     this.userLastActivityDate,
     this.userMessageToken,
     this.userNotificationSettings,
+    this.userClubs,
   );
 
   factory KmUser.fromJson(Map<String, dynamic> json) => KmUser.withInfo(
@@ -65,6 +67,7 @@ class KmUser {
         json["user_last_activity_date"],
         json["user_message_token"],
         UserNotificationSettings.fromJson(json["user_notification_settings"]),
+        json["user_clubs"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -80,8 +83,9 @@ class KmUser {
         "user_has_banned": userHasBanned,
         "user_avatar": userAvatar,
         "user_is_online": userIsOnline,
-        "user_last_activity_date": userLastActivityDate,
+        "user_last_activity_date": userLastActivityDate.toDate().toIso8601String(),
         "user_message_token": userMessageToken,
         "user_notification_settings": userNotificationSettings.toJson(),
+        "user_clubs": userClubs,
       };
 }

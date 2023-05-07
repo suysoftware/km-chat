@@ -246,7 +246,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                       context.read<KmUserCubit>().changeUser(kmUser);
 
-                      await Navigator.pushReplacementNamed(context, "/Chat");
+                      await Navigator. pushReplacementNamed(context, "/Chat");
                     });
                   }
                 }
