@@ -1,0 +1,1 @@
+enum ChatSectionEnum { bot, club, private, public }

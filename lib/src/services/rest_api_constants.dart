@@ -15,4 +15,5 @@ class RestApiConstants {
   static String API_LINK_TOKEN_UPDATE_REQUEST = dotenv.env['API_LINK_TOKEN_UPDATE_REQUEST'].toString();
   static String API_LINK_NOTIFICATION_SETTING_UPDATE = dotenv.env['API_LINK_NOTIFICATION_SETTING_UPDATE'].toString();
   static String API_LINK_SEND_MESSAGE_TO_PUBLIC = dotenv.env['API_LINK_SEND_MESSAGE_TO_PUBLIC'].toString();
+    static String API_LINK_SEND_MESSAGE_TO_PRIVATE = dotenv.env['API_LINK_SEND_MESSAGE_TO_PRIVATE'].toString();
 }

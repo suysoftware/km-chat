@@ -29,7 +29,7 @@ class KmUser {
   late Timestamp userLastActivityDate;
   late String userMessageToken;
   late UserNotificationSettings userNotificationSettings;
-  late List<dynamic> userClubs;
+
 
   KmUser();
 
@@ -48,7 +48,7 @@ class KmUser {
     this.userLastActivityDate,
     this.userMessageToken,
     this.userNotificationSettings,
-    this.userClubs,
+    
   );
 
   factory KmUser.fromJson(Map<String, dynamic> json) => KmUser.withInfo(
@@ -59,15 +59,14 @@ class KmUser {
         json["user_uid"],
         json["user_experience_points"],
         json["user_level"],
-        Map.from(json["user_blocked_map"]).map((k, v) =>
-            MapEntry<String, UserBlockedMap>(k, UserBlockedMap.fromJson(v))),
+        Map.from(json["user_blocked_map"]).map((k, v) => MapEntry<String, UserBlockedMap>(k, UserBlockedMap.fromJson(v))),
         json["user_has_banned"],
         json["user_avatar"],
         json["user_is_online"],
         json["user_last_activity_date"],
         json["user_message_token"],
         UserNotificationSettings.fromJson(json["user_notification_settings"]),
-        json["user_clubs"],
+
       );
 
   Map<String, dynamic> toJson() => {
@@ -78,14 +77,13 @@ class KmUser {
         "user_uid": userUid,
         "user_experience_points": userExperiencePoints,
         "user_level": userLevel,
-        "user_blocked_map": Map.from(userBlockedMap)
-            .map((k, v) => MapEntry<String, dynamic>(k, v.toJson())),
+        "user_blocked_map": Map.from(userBlockedMap).map((k, v) => MapEntry<String, dynamic>(k, v.toJson())),
         "user_has_banned": userHasBanned,
         "user_avatar": userAvatar,
         "user_is_online": userIsOnline,
-        "user_last_activity_date": userLastActivityDate.toDate().toIso8601String(),
+        "user_last_activity_date": userLastActivityDate.millisecondsSinceEpoch,
         "user_message_token": userMessageToken,
         "user_notification_settings": userNotificationSettings.toJson(),
-        "user_clubs": userClubs,
+
       };
 }

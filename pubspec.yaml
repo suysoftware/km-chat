@@ -126,7 +126,7 @@ flutter:
   #         weight: 700
     - family: Coderstyle
       fonts:
-        - asset: fonts/CoderStyle.ttf
+        - asset: fonts/1KmFont.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700 
     - family: Codersprite

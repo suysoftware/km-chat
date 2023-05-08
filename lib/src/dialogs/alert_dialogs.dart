@@ -32,7 +32,7 @@ class AlertDialogs {
         context: context,
         builder: (BuildContext context) => CupertinoAlertDialog(
               content: Text(
-                "Do you want Spam and Block ?\n => ${targetMessage.userName} <= ",
+                "Do you want Spam and Block ?\n => ${targetMessage.senderUser .userName} <= ",
                 style: TextStyle(
                     color: ColorConstants.themeColor,
                     fontFamily: "CoderStyle",
@@ -51,15 +51,15 @@ class AlertDialogs {
                       var spamResponse;
                       spamResponse = await FirestoreOperations.spamRequest(
                           kmUser,
-                          targetMessage.userName,
-                          targetMessage.userUid,
+                          targetMessage.senderUser.userName,
+                          targetMessage.senderUser.userUid,
                           targetMessage.userMessage);
 
                       if (spamResponse) {
                         // ignore: use_build_context_synchronously
                         context.read<KmUserCubit>().addBlocked(
-                            targetMessage.userName,
-                            targetMessage.userUid,
+                            targetMessage.senderUser.userName,
+                            targetMessage.senderUser.userUid,
                             targetMessage.userMessage);
                         // ignore: use_build_context_synchronously
                         Navigator.pop(context);

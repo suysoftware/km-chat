@@ -10,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:one_km/src/bloc/km_chat_reference.dart';
 import 'package:one_km/src/bloc/km_system_settings_cubit.dart';
 import 'package:one_km/src/bloc/km_user_cubit.dart';
 import 'package:one_km/src/screens/login_screen.dart';
@@ -76,6 +77,9 @@ class KmApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (context) => KmSystemSettingsCubit(),
+          ),
+            BlocProvider(
+            create: (context) => KmChatReferenceCubit(),
           ),
         ], child: const _cupertinoApp()),
       );

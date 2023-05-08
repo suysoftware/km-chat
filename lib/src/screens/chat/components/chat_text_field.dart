@@ -1,15 +1,20 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sizer/sizer.dart';
 
 import 'package:one_km/src/constants/color_constants.dart';
 import 'package:one_km/src/screens/chat/components/white_rabbit_button.dart';
 
+import '../../../bloc/km_chat_reference.dart';
+import '../../../models/km_chat_reference_model.dart';
+
 class ChatTextField extends StatelessWidget {
-  final void Function() whiteRabbitButtonOperation;
+  final void Function(String, String, String) whiteRabbitButtonOperation;
   final void Function(String) textFieldOnChangeOperation;
   final FocusNode textFieldFocusNode;
   final TextEditingController messageController;
+  final String privateTargetName;
 
   ChatTextField({
     Key? key,
@@ -17,6 +22,7 @@ class ChatTextField extends StatelessWidget {
     required this.textFieldOnChangeOperation,
     required this.textFieldFocusNode,
     required this.messageController,
+    required this.privateTargetName,
   }) : super(key: key);
 
   @override
@@ -39,8 +45,8 @@ class ChatTextField extends StatelessWidget {
                     suffix: Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text(
-                        "${messageController.text.length}/99",
-                        style: TextStyle(wordSpacing: 2, letterSpacing: 2.0, fontSize: 16.sp, color: ColorConstants.designGreen),
+                        "${(messageController.text.length - (privateTargetName.length))}/99",
+                        style: TextStyle(wordSpacing: 2, letterSpacing: 2.0, fontSize: 15.sp, color: ColorConstants.designGreen),
                       ),
                     ),
                     autofocus: false,
@@ -49,9 +55,9 @@ class ChatTextField extends StatelessWidget {
                     onChanged: textFieldOnChangeOperation,
                     enableInteractiveSelection: true,
                     maxLines: 3,
-                    maxLength: 99,
+                    maxLength: 99 + privateTargetName.length,
                     showCursor: true,
-                    padding: EdgeInsets.fromLTRB(2.w, 1.w, 1.w, 1.w),
+                    padding: EdgeInsets.fromLTRB(2.w, 3.w, 1.w, 1.w),
                     cursorColor: CupertinoColors.activeGreen,
                     cursorHeight: 3.h,
                     decoration: const BoxDecoration(
@@ -62,7 +68,14 @@ class ChatTextField extends StatelessWidget {
                     controller: messageController,
                   ),
                 ),
-                Expanded(flex: 1, child: WhiteRabbitButton(whiteRabbitButtonOperation: whiteRabbitButtonOperation))
+                Expanded(
+                  flex: 1,
+                  child: BlocBuilder<KmChatReferenceCubit, KmChatReferenceModel>(builder: (context, refBloc) {
+                    return WhiteRabbitButton(whiteRabbitButtonOperation: () {
+                      whiteRabbitButtonOperation(refBloc.chatSectionEnum.name, refBloc.chatTargetName, refBloc.chatTargetNo);
+                    });
+                  }),
+                )
               ],
             ),
           ],

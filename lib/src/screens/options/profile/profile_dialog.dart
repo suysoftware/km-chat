@@ -89,7 +89,7 @@ class _ProfileDialogState extends State<ProfileDialog> {
             backgroundColor: ColorConstants.themeColor,
             radius: 60.sp,
             child: Image.network(widget.kmChatMessage != null
-                ? widget.kmChatMessage!.userAvatar
+                ? widget.kmChatMessage!.senderUser .userAvatar
                 : avatarLink)),
       ),
     );
@@ -99,7 +99,7 @@ class _ProfileDialogState extends State<ProfileDialog> {
     return Align(
       alignment: Alignment.center,
       child: Text(
-        '/${widget.kmChatMessage != null ? widget.kmChatMessage!.userName : userName}',
+        '/${widget.kmChatMessage != null ? widget.kmChatMessage!.senderUser .userName : userName}',
         style: StyleConstants.profileNameTextStyle,
       ),
     );
@@ -227,17 +227,17 @@ class _ProfileDialogState extends State<ProfileDialog> {
   Widget kmTitleTextBuild(BuildContext context, String newUserTitle) {
     return Text(
         (widget.kmChatMessage != null
-            ? widget.kmChatMessage!.userTitle
+            ? widget.kmChatMessage!.senderUser .userTitle
             : newUserTitle),
         style: BasicGetters.profileTitleTextStyleGetter(
             widget.kmChatMessage != null
-                ? widget.kmChatMessage!.userTitle
+                ? widget.kmChatMessage!.senderUser .userTitle
                 : newUserTitle));
   }
 
   Widget kmLevelTextBuild(BuildContext context, String userLevel) {
     return Text(
-      'lv.${widget.kmChatMessage != null ? widget.kmChatMessage!.userLevel.toString() : userLevel}',
+      'lv.${widget.kmChatMessage != null ? widget.kmChatMessage!.senderUser .userLevel.toString() : userLevel}',
       style: StyleConstants.profileLevelTextStyle,
     );
   }

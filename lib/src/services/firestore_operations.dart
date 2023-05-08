@@ -117,24 +117,83 @@ class FirestoreOperations {
     return userGeo;
   }
 
-  static Future<void> sendMessageToPublic(String userMessage, KmUser kmUser, bool publicNotification, KmSystemSettings kmSystemSettings) async {
+  static Future<void> sendMessageToPrivate(String userMessage, KmUser kmUser, KmUser recieverUser) async {
     int spaceValue = 0;
+
+   /* for (var i = 0; i < userMessage.length; i++) {
+      if (userMessage[i] == " ") {
+        spaceValue = spaceValue + 1;
+      }
+    }*/
     if (userMessage.length < 1 || userMessage.length - spaceValue <= spaceValue) {
       return;
     }
+    var senderUser = KmUser.withInfo(
+        UserCoordinates(latitude: 0, longitude: 0, isoCountryCode: "", administrativeArea: "", locality: "", subLocality: "", postalCode: ""),
+        kmUser.userName,
+        "",
+        kmUser.userTitle,
+        kmUser.userUid,
+        kmUser.userExperiencePoints,
+        kmUser.userLevel,
+        kmUser.userBlockedMap,
+        kmUser.userHasBanned,
+        kmUser.userAvatar,
+        kmUser.userIsOnline,
+        kmUser.userLastActivityDate,
+        kmUser.userMessageToken,
+        kmUser.userNotificationSettings,
+     );
+
+    var payLoad;
+    payLoad = {
+      "user_message": userMessage,
+      "sender_user": jsonEncode(senderUser.toJson()),
+      "reciever_user": jsonEncode(recieverUser.toJson()),
+    };
+    try {
+      await apiRequest(RestApiConstants.API_LINK_SEND_MESSAGE_TO_PRIVATE, payLoad);
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  static Future<void> sendMessageToPublic(String userMessage, KmUser kmUser, bool publicNotification, KmSystemSettings kmSystemSettings) async {
+    int spaceValue = 0;
+
     for (var i = 0; i < userMessage.length; i++) {
       if (userMessage[i] == " ") {
         spaceValue = spaceValue + 1;
       }
     }
-
+    if (userMessage.length < 1 || userMessage.length - spaceValue <= spaceValue) {
+      return;
+    }
     var canSendNotification = publicNotification ? "yes" : "no";
+
+    var senderUser = KmUser.withInfo(
+        UserCoordinates(latitude: 0, longitude: 0, isoCountryCode: "", administrativeArea: "", locality: "", subLocality: "", postalCode: ""),
+        kmUser.userName,
+        "",
+        kmUser.userTitle,
+        kmUser.userUid,
+        kmUser.userExperiencePoints,
+        kmUser.userLevel,
+        kmUser.userBlockedMap,
+        kmUser.userHasBanned,
+        kmUser.userAvatar,
+        kmUser.userIsOnline,
+        kmUser.userLastActivityDate,
+        kmUser.userMessageToken,
+        kmUser.userNotificationSettings,
+   );
 
     var payLoad;
     payLoad = {
       "can_send_notification": canSendNotification,
       "user_message": userMessage,
       "system_chat_setting": kmSystemSettings.chatDistance,
+      "sender_user": jsonEncode(senderUser.toJson()),
       "km_user": jsonEncode(kmUser.toJson()),
     };
     try {
@@ -144,6 +203,7 @@ class FirestoreOperations {
     }
   }
 
+/*
   static Future<bool> sendMessageToChat(
       String userMessage, KmUser kmUserForMessage, KmSystemSettings kmSystemSettings, String privateMessageTarget, String privateMessage, bool publicNotification) async {
     bool isPrivate = privateMessageTarget != "" ? true : false;
@@ -188,7 +248,8 @@ class FirestoreOperations {
           userBlockedList: userBlockedConvertList,
           userUid: kmUserForMessage.userUid,
           userAvatar: kmUserForMessage.userAvatar,
-          userClubs: []);
+          userClubs: [],
+          );
 
       var chatRef = BasicGetters.chatStreamReferenceGetter(kmUserForMessage.userCoordinates, kmSystemSettings);
 
@@ -205,7 +266,7 @@ class FirestoreOperations {
       return false;
     }
   }
-
+*/
   static Future<KmSystemSettings> kmSystemSettingsGetter() async {
     var systemSettings;
     final settingsRef = FirebaseFirestore.instance
@@ -221,24 +282,54 @@ class FirestoreOperations {
   static Future<bool> joinRoomRequest(KmUser kmUser, KmSystemSettings kmSystemSettings) async {
     var payLoad;
 
+    var systemUser = KmUser.withInfo(
+        UserCoordinates(latitude: 0, longitude: 0, isoCountryCode: "", administrativeArea: "", locality: "", subLocality: "", postalCode: ""),
+        'System',
+        '',
+        'system',
+        kmUser.userUid,
+        0,
+        0,
+        kmUser.userBlockedMap,
+        false,
+        'admin_avatar',
+        true,
+        kmUser.userLastActivityDate,
+        "",
+        kmUser.userNotificationSettings,
+ );
+
+    var senderUser = KmUser.withInfo(
+        UserCoordinates(latitude: 0, longitude: 0, isoCountryCode: "", administrativeArea: "", locality: "", subLocality: "", postalCode: ""),
+        kmUser.userName,
+        "",
+        kmUser.userTitle,
+        kmUser.userUid,
+        kmUser.userExperiencePoints,
+        kmUser.userLevel,
+        kmUser.userBlockedMap,
+        kmUser.userHasBanned,
+        kmUser.userAvatar,
+        kmUser.userIsOnline,
+        kmUser.userLastActivityDate,
+        kmUser.userMessageToken,
+        kmUser.userNotificationSettings,
+  );
+
     payLoad = {
-      "user_no": kmUser.userUid,
-      "user_name": kmUser.userName,
       "system_chat_setting": kmSystemSettings.chatDistance,
-      "user_country": kmUser.userCoordinates.isoCountryCode,
-      "user_city": kmUser.userCoordinates.administrativeArea,
-      "user_district": kmUser.userCoordinates.locality,
-      "user_postal": kmUser.userCoordinates.postalCode,
+      "km_user":jsonEncode(kmUser.toJson()),
+      "system_user": jsonEncode(systemUser.toJson()),
     };
 
     var response = await apiRequest(RestApiConstants.API_LINK_JOIN_ROOM_MESSAGE, payLoad);
 
     if (response) {
-      //print('COMPLETE (join room request)');
+      print('COMPLETE (join room request)');
 
       return true;
     } else {
-      //print('ERROR (join room request)');
+      print('ERROR (join room request)');
       return false;
     }
   }
@@ -380,6 +471,23 @@ class FirestoreOperations {
   }
 
   static Future<bool> apiRequest(String apiLink, dynamic payLoad) async {
+      
+    var client = http.Client();
+
+    var uriIE = Uri.parse(apiLink);
+ 
+
+    
+
+    var response = await client.put(uriIE, body: payLoad);
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+    /*with security
+    
     var client = http.Client();
 
     var uriIE = Uri.parse(apiLink);
@@ -397,5 +505,6 @@ class FirestoreOperations {
     } else {
       return false;
     }
+     */
   }
 }

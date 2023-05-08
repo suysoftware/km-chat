@@ -1,4 +1,56 @@
+
 // To parse this JSON data, do
+//
+//     final KmChatMessage = KmChatMessageFromJson(jsonString);
+
+import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:one_km/src/models/km_user.dart';
+
+List<KmChatMessage> KmChatMessageFromJson(String str) => List<KmChatMessage>.from(json.decode(str).map((x) => KmChatMessage.fromJson(x)));
+
+String KmChatMessageToJson(List<KmChatMessage> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+
+class KmChatMessage {
+  late String userMessage;
+  late Timestamp userMessageTime;
+  late KmUser senderUser;
+  late KmUser recieverUser;
+
+  KmChatMessage(
+      {required this.userMessage,
+      required this.userMessageTime,
+      required this.senderUser,
+      required this.recieverUser,
+    });
+
+  factory KmChatMessage.fromJson(Map<String, dynamic> json) => KmChatMessage(
+        userMessage: json["user_message"],
+        userMessageTime: json["user_message_time"],
+     senderUser: KmUser.fromJson(json["sender_user"]),
+      recieverUser: KmUser.fromJson(json["reciever_user"]),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "user_message": userMessage,
+        "user_message_time": userMessageTime.toDate().toIso8601String(),
+        "sender_user": senderUser.toJson(),
+        "reciever_user": recieverUser.toJson(),
+      };
+
+      
+ 
+}
+
+
+
+
+
+
+
+
+/*// To parse this JSON data, do
 //
 //     final kmChatMessage = kmChatMessageFromJson(jsonString);
 
@@ -6,12 +58,9 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-List<KmChatMessage> kmChatMessageFromJson(String str) =>
-    List<KmChatMessage>.from(
-        json.decode(str).map((x) => KmChatMessage.fromJson(x)));
+List<KmChatMessage> kmChatMessageFromJson(String str) => List<KmChatMessage>.from(json.decode(str).map((x) => KmChatMessage.fromJson(x)));
 
-String kmChatMessageToJson(List<KmChatMessage> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String kmChatMessageToJson(List<KmChatMessage> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class KmChatMessage {
   late String userMessage;
@@ -33,7 +82,8 @@ class KmChatMessage {
       required this.userBlockedList,
       required this.userUid,
       required this.userAvatar,
-      required this.userClubs});
+      required this.userClubs
+      });
 
   factory KmChatMessage.fromJson(Map<String, dynamic> json) => KmChatMessage(
       userMessage: json["user_message"],
@@ -44,7 +94,7 @@ class KmChatMessage {
       userBlockedList: json["user_blocked_list"],
       userUid: json["user_uid"],
       userAvatar: json["user_avatar"],
-      userClubs: json["user_clubs"]);
+      userClubs: json["user_clubs"],);
 
   Map<String, dynamic> toJson() => {
         "user_message": userMessage,
@@ -55,6 +105,7 @@ class KmChatMessage {
         "user_blocked_list": userBlockedList,
         "user_uid": userUid,
         "user_avatar": userAvatar,
-        "user_clubs": userClubs
+        "user_clubs": userClubs,
       };
 }
+*/
