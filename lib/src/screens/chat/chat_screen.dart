@@ -66,7 +66,7 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  Future<void> whiteRabbitButtonOperation(String chatSectionEnumName, String targetName, String targetUid) async {
+  Future<void> whiteRabbitButtonOperation(String chatSectionEnumName, String targetName, String targetUid, List<KmChatMessage> kmChatMessages) async {
     var textFieldData = messageController.text;
     messageController.clear();
 
@@ -80,6 +80,7 @@ class _ChatScreenState extends State<ChatScreen> {
       case "club":
         break;
       case "bot":
+        await FirestoreOperations.sendMessageToBot(textFieldData, context.read<KmUserCubit>().state, kmChatMessages);
         break;
       default:
     }
@@ -180,17 +181,6 @@ class _ChatScreenState extends State<ChatScreen> {
                       height: 1.h,
                     ),
                     chatStreamBuilder(context.read<KmUserCubit>().state),
-                    ChatTargetSection(),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    ChatTextField(
-                      whiteRabbitButtonOperation: whiteRabbitButtonOperation,
-                      textFieldOnChangeOperation: chatTextFieldOnChangeOperation,
-                      textFieldFocusNode: textFieldFocusNode,
-                      messageController: messageController,
-                      privateTargetName: privateMessageTargetName != "" ? "$privateMessageTargetName   " : privateMessageTargetName,
-                    )
                   ],
                 )
               : MiniWidgets.lostConnectionWidgetBuild()),
@@ -284,13 +274,31 @@ class _ChatScreenState extends State<ChatScreen> {
                           }
                         }
 
-                        return ListView.builder(
-                            reverse: true,
-                            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.values.last,
-                            itemCount: snapData.isNotEmpty ? snapData.length : 0,
-                            itemBuilder: (context, indeks) {
-                              return snapData.isNotEmpty ? ChatItem(kmChatMessage: snapData[indeks], kmUser: kmUser, replyOperation: _replyOperation) : const SizedBox();
-                            });
+                        return Column(
+                          children: [
+                            Flexible(
+                              child: ListView.builder(
+                                  reverse: true,
+                                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.values.last,
+                                  itemCount: snapData.isNotEmpty ? snapData.length : 0,
+                                  itemBuilder: (context, indeks) {
+                                    return snapData.isNotEmpty ? ChatItem(kmChatMessage: snapData[indeks], kmUser: kmUser, replyOperation: _replyOperation) : const SizedBox();
+                                  }),
+                            ),
+                            ChatTargetSection(),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            ChatTextField(
+                              whiteRabbitButtonOperation: whiteRabbitButtonOperation,
+                              textFieldOnChangeOperation: chatTextFieldOnChangeOperation,
+                              textFieldFocusNode: textFieldFocusNode,
+                              messageController: messageController,
+                              privateTargetName: privateMessageTargetName != "" ? "$privateMessageTargetName   " : privateMessageTargetName,
+                              kmChatMessage: snapData,
+                            )
+                          ],
+                        );
                       } else {
                         return MiniWidgets.circularProgress();
                       }

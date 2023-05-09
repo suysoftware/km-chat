@@ -17,13 +17,13 @@ class NotificationDialog extends StatefulWidget {
 class _NotificationDialogState extends State<NotificationDialog> {
   bool publicSwitchValue = false;
   bool privateSwitchValue = false;
-  bool clubSwitchValue = false;
+
   @override
   void initState() {
     super.initState();
     publicSwitchValue = context.read<KmUserCubit>().state.userNotificationSettings.publicMessage;
     privateSwitchValue = context.read<KmUserCubit>().state.userNotificationSettings.privateMessage;
-    clubSwitchValue = context.read<KmUserCubit>().state.userNotificationSettings.clubMessage;
+ ;
   }
 
   @override
@@ -57,10 +57,7 @@ class _NotificationDialogState extends State<NotificationDialog> {
                 height: 2.h,
               ),
               notificationSwitch(privateSwitchValue, "Private"),
-              SizedBox(
-                height: 2.h,
-              ),
-              notificationSwitch(clubSwitchValue, "Club")
+           
             ],
           ),
         ));
@@ -86,19 +83,14 @@ class _NotificationDialogState extends State<NotificationDialog> {
               setState(() {
                 privateSwitchValue = value;
               });
-            } else if (notificationType == "Club") {
-              setState(() {
-                clubSwitchValue = value;
-              });
-            }
+            } 
+            
             FirestoreOperations.kmUserNotificationSettingUpdate(context.read<KmUserCubit>().state, notificationType, value).then((requestResult) {
               if (notificationType == "Public") {
                 context.read<KmUserCubit>().notificationSettingPublicChange(value);
               } else if (notificationType == "Private") {
                 context.read<KmUserCubit>().notificationSettingPrivateChange(value);
-              } else if (notificationType == "Club") {
-                context.read<KmUserCubit>().notificationSettingClubChange(value);
-              }
+              } 
             });
           },
           activeColor: ColorConstants.designGreen,

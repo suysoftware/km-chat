@@ -149,7 +149,15 @@ class BasicGetters {
     var dateTime = DateTime.now().millisecondsSinceEpoch;
 
     for (var chatMessage in kmChatList) {
-      if (!chatMessage.senderUser.userBlockedMap.keys.contains(myUserModel.userUid) && myUserModel.userBlockedMap[chatMessage.senderUser.userUid] == null) {
+      if (myUserModel.userBlockedMap.keys.contains(chatMessage.senderUser.userUid)) {
+        kmChatFilteredList.removeWhere((element) => element.senderUser.userUid == chatMessage.senderUser.userUid);
+      } else if (myUserModel.userBlockedMap.keys.contains(chatMessage.recieverUser.userUid)) {
+        kmChatFilteredList.removeWhere((element) => element.recieverUser.userUid == chatMessage.recieverUser.userUid);
+      } else if (chatMessage.recieverUser.userBlockedMap.keys.contains(myUserModel.userUid)) {
+        kmChatFilteredList.removeWhere((element) => element.recieverUser.userUid == chatMessage.recieverUser.userUid);
+      } else if (chatMessage.senderUser.userBlockedMap.keys.contains(myUserModel.userUid)) {
+        kmChatFilteredList.removeWhere((element) => element.senderUser.userUid == chatMessage.senderUser.userUid);
+      } else {
         /*  if (chatMessage.data().messageIsPrivate &&
             chatMessage.data().privateMessageTarget == myUserModel.userUid &&
             dateTime - chatMessage.data().userMessageTime.millisecondsSinceEpoch < 2000) {
@@ -225,13 +233,15 @@ class BasicGetters {
         chatSectionEnum: ChatSectionEnum.public,
         messageLength: 0,
         targetName: kmLogoChatDistanceTextGetter(kmSystemSettings.chatDistance, myUserModel.userCoordinates).length < 5
-            ? kmLogoChatDistanceTextGetter(kmSystemSettings.chatDistance, myUserModel.userCoordinates) + " - Public"
+            ? "${kmLogoChatDistanceTextGetter(kmSystemSettings.chatDistance, myUserModel.userCoordinates)} - Public"
             : kmLogoChatDistanceTextGetter(kmSystemSettings.chatDistance, myUserModel.userCoordinates),
         targetUid: "Public",
         lastActivityDate: Timestamp.fromMillisecondsSinceEpoch(DateTime.now().millisecondsSinceEpoch),
         targetAvatar: ""));
     for (var chatMessage in kmChatList) {
-      if (!chatMessage.senderUser.userBlockedMap.keys.contains(myUserModel.userUid) && myUserModel.userBlockedMap[chatMessage.senderUser.userUid] == null) {
+      if (myUserModel.userBlockedMap.keys.contains(chatMessage.senderUser.userUid) || myUserModel.userBlockedMap.keys.contains(chatMessage.recieverUser.userUid)) {
+        print("banli user");
+      } else {
         if (chatMessage.senderUser.userUid != myUserModel.userUid && dateTime - chatMessage.userMessageTime.millisecondsSinceEpoch < 2000) {
           Vibration.vibrate(duration: 40);
         }
@@ -298,7 +308,7 @@ class BasicGetters {
           recognizer: LongPressGestureRecognizer()
             ..onLongPress = () {
               HapticFeedback.vibrate();
-              if (kmChatMessage.senderUser.userTitle != "system" && kmChatMessage.senderUser.userTitle != "admin" && kmChatMessage.senderUser.userUid != myUid) {
+              if (kmChatMessage.senderUser.userTitle != "system" && kmChatMessage.senderUser.userTitle != "admin" && kmChatMessage.senderUser.userUid != myUid&&kmChatMessage.senderUser.userTitle!="bot") {
                 showCupertinoDialog(barrierDismissible: true, context: context, builder: (context) => ProfileDialog(kmChatMessage: kmChatMessage));
               }
             },

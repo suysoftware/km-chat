@@ -106,7 +106,7 @@ class KmUserCubit extends Cubit<KmUser> {
     newKmUser.userMessageToken = state.userMessageToken;
    
     newKmUser.userNotificationSettings = UserNotificationSettings(
-        privateMessage: state.userNotificationSettings.privateMessage, publicMessage: value, clubMessage: state.userNotificationSettings.clubMessage);
+        privateMessage: state.userNotificationSettings.privateMessage, publicMessage: value, );
     emit(newKmUser);
   }
     void notificationSettingPrivateChange(bool value) {
@@ -126,7 +126,7 @@ class KmUserCubit extends Cubit<KmUser> {
     newKmUser.userMessageToken = state.userMessageToken;
 
     newKmUser.userNotificationSettings = UserNotificationSettings(
-        privateMessage: value, publicMessage: state.userNotificationSettings.publicMessage, clubMessage: state.userNotificationSettings.clubMessage);
+        privateMessage: value, publicMessage: state.userNotificationSettings.publicMessage,);
     emit(newKmUser);
   }
     void notificationSettingClubChange(bool value) {
@@ -146,7 +146,7 @@ class KmUserCubit extends Cubit<KmUser> {
     newKmUser.userMessageToken = state.userMessageToken;
    
     newKmUser.userNotificationSettings = UserNotificationSettings(
-        privateMessage: state.userNotificationSettings.privateMessage, publicMessage: state.userNotificationSettings.publicMessage, clubMessage: value);
+        privateMessage: state.userNotificationSettings.privateMessage, publicMessage: state.userNotificationSettings.publicMessage,);
     emit(newKmUser);
   }
 }

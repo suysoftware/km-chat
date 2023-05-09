@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:one_km/src/models/km_chat_message.dart';
 import 'package:sizer/sizer.dart';
 
 import 'package:one_km/src/constants/color_constants.dart';
@@ -10,19 +11,21 @@ import '../../../bloc/km_chat_reference.dart';
 import '../../../models/km_chat_reference_model.dart';
 
 class ChatTextField extends StatelessWidget {
-  final void Function(String, String, String) whiteRabbitButtonOperation;
+  final void Function(String, String, String,List<KmChatMessage> kmChatMessage) whiteRabbitButtonOperation;
   final void Function(String) textFieldOnChangeOperation;
   final FocusNode textFieldFocusNode;
   final TextEditingController messageController;
   final String privateTargetName;
+  final List<KmChatMessage> kmChatMessage;
 
-  ChatTextField({
+  const ChatTextField({
     Key? key,
     required this.whiteRabbitButtonOperation,
     required this.textFieldOnChangeOperation,
     required this.textFieldFocusNode,
     required this.messageController,
     required this.privateTargetName,
+    required this.kmChatMessage,
   }) : super(key: key);
 
   @override
@@ -72,7 +75,7 @@ class ChatTextField extends StatelessWidget {
                   flex: 1,
                   child: BlocBuilder<KmChatReferenceCubit, KmChatReferenceModel>(builder: (context, refBloc) {
                     return WhiteRabbitButton(whiteRabbitButtonOperation: () {
-                      whiteRabbitButtonOperation(refBloc.chatSectionEnum.name, refBloc.chatTargetName, refBloc.chatTargetNo);
+                      whiteRabbitButtonOperation(refBloc.chatSectionEnum.name, refBloc.chatTargetName, refBloc.chatTargetNo,kmChatMessage);
                     });
                   }),
                 )

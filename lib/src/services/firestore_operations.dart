@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:one_km/src/models/km_chat_bot_message.dart';
 import 'package:one_km/src/models/km_chat_message.dart';
 import 'package:one_km/src/models/km_system_settings.dart';
 import 'package:one_km/src/models/km_user.dart';
@@ -117,10 +118,51 @@ class FirestoreOperations {
     return userGeo;
   }
 
+  static Future<void> sendMessageToBot(String userMessage, KmUser kmUser, List<KmChatMessage> kmChatMessageList) async {
+    int spaceValue = 0;
+
+    /* for (var i = 0; i < userMessage.length; i++) {
+      if (userMessage[i] == " ") {
+        spaceValue = spaceValue + 1;
+      }
+    }*/
+    if (userMessage.length < 1 || userMessage.length - spaceValue <= spaceValue) {
+      return;
+    }
+    var kmChatBotMessageList = <KmChatBotMessage>[];
+
+    for (var element in kmChatMessageList) {
+      if (element.senderUser.userTitle == "bot") {
+        kmChatBotMessageList.add(KmChatBotMessage(role: "assistant", content: element.userMessage));
+      } else {
+        kmChatBotMessageList.add(KmChatBotMessage(role: "user", content: element.userMessage));
+      }
+    }
+
+    kmChatBotMessageList.add(KmChatBotMessage(role: "user", content: userMessage));
+
+    var botUser = KmUser.withInfo(
+        kmUser.userCoordinates, "KM-BOT", "", "bot", "", 0, 0, kmUser.userBlockedMap, false, "", true, kmUser.userLastActivityDate, "", kmUser.userNotificationSettings);
+
+    var payLoad;
+
+  
+    payLoad = {
+      "km_user": jsonEncode(kmUser.toJson()),
+      "km_chat_bot_message_list": jsonEncode(kmChatBotMessageList),
+      "bot_user": jsonEncode(botUser.toJson()),
+    };
+    try {
+      await apiRequest(RestApiConstants.API_LINK_SEND_MESSAGE_TO_BOT, payLoad);
+    } catch (e) {
+      print(e);
+    }
+  }
+
   static Future<void> sendMessageToPrivate(String userMessage, KmUser kmUser, KmUser recieverUser) async {
     int spaceValue = 0;
 
-   /* for (var i = 0; i < userMessage.length; i++) {
+    /* for (var i = 0; i < userMessage.length; i++) {
       if (userMessage[i] == " ") {
         spaceValue = spaceValue + 1;
       }
@@ -129,21 +171,21 @@ class FirestoreOperations {
       return;
     }
     var senderUser = KmUser.withInfo(
-        UserCoordinates(latitude: 0, longitude: 0, isoCountryCode: "", administrativeArea: "", locality: "", subLocality: "", postalCode: ""),
-        kmUser.userName,
-        "",
-        kmUser.userTitle,
-        kmUser.userUid,
-        kmUser.userExperiencePoints,
-        kmUser.userLevel,
-        kmUser.userBlockedMap,
-        kmUser.userHasBanned,
-        kmUser.userAvatar,
-        kmUser.userIsOnline,
-        kmUser.userLastActivityDate,
-        kmUser.userMessageToken,
-        kmUser.userNotificationSettings,
-     );
+      UserCoordinates(latitude: 0, longitude: 0, isoCountryCode: "", administrativeArea: "", locality: "", subLocality: "", postalCode: ""),
+      kmUser.userName,
+      "",
+      kmUser.userTitle,
+      kmUser.userUid,
+      kmUser.userExperiencePoints,
+      kmUser.userLevel,
+      kmUser.userBlockedMap,
+      kmUser.userHasBanned,
+      kmUser.userAvatar,
+      kmUser.userIsOnline,
+      kmUser.userLastActivityDate,
+      kmUser.userMessageToken,
+      kmUser.userNotificationSettings,
+    );
 
     var payLoad;
     payLoad = {
@@ -172,22 +214,23 @@ class FirestoreOperations {
     var canSendNotification = publicNotification ? "yes" : "no";
 
     var senderUser = KmUser.withInfo(
-        UserCoordinates(latitude: 0, longitude: 0, isoCountryCode: "", administrativeArea: "", locality: "", subLocality: "", postalCode: ""),
-        kmUser.userName,
-        "",
-        kmUser.userTitle,
-        kmUser.userUid,
-        kmUser.userExperiencePoints,
-        kmUser.userLevel,
-        kmUser.userBlockedMap,
-        kmUser.userHasBanned,
-        kmUser.userAvatar,
-        kmUser.userIsOnline,
-        kmUser.userLastActivityDate,
-        kmUser.userMessageToken,
-        kmUser.userNotificationSettings,
-   );
+      UserCoordinates(latitude: 0, longitude: 0, isoCountryCode: "", administrativeArea: "", locality: "", subLocality: "", postalCode: ""),
+      kmUser.userName,
+      "",
+      kmUser.userTitle,
+      kmUser.userUid,
+      kmUser.userExperiencePoints,
+      kmUser.userLevel,
+      kmUser.userBlockedMap,
+      kmUser.userHasBanned,
+      kmUser.userAvatar,
+      kmUser.userIsOnline,
+      kmUser.userLastActivityDate,
+      kmUser.userMessageToken,
+      kmUser.userNotificationSettings,
+    );
 
+    print(jsonEncode(senderUser.toJson()));
     var payLoad;
     payLoad = {
       "can_send_notification": canSendNotification,
@@ -283,42 +326,42 @@ class FirestoreOperations {
     var payLoad;
 
     var systemUser = KmUser.withInfo(
-        UserCoordinates(latitude: 0, longitude: 0, isoCountryCode: "", administrativeArea: "", locality: "", subLocality: "", postalCode: ""),
-        'System',
-        '',
-        'system',
-        kmUser.userUid,
-        0,
-        0,
-        kmUser.userBlockedMap,
-        false,
-        'admin_avatar',
-        true,
-        kmUser.userLastActivityDate,
-        "",
-        kmUser.userNotificationSettings,
- );
+      UserCoordinates(latitude: 0, longitude: 0, isoCountryCode: "", administrativeArea: "", locality: "", subLocality: "", postalCode: ""),
+      'System',
+      '',
+      'system',
+      kmUser.userUid,
+      0,
+      0,
+      kmUser.userBlockedMap,
+      false,
+      'admin_avatar',
+      true,
+      kmUser.userLastActivityDate,
+      "",
+      kmUser.userNotificationSettings,
+    );
 
     var senderUser = KmUser.withInfo(
-        UserCoordinates(latitude: 0, longitude: 0, isoCountryCode: "", administrativeArea: "", locality: "", subLocality: "", postalCode: ""),
-        kmUser.userName,
-        "",
-        kmUser.userTitle,
-        kmUser.userUid,
-        kmUser.userExperiencePoints,
-        kmUser.userLevel,
-        kmUser.userBlockedMap,
-        kmUser.userHasBanned,
-        kmUser.userAvatar,
-        kmUser.userIsOnline,
-        kmUser.userLastActivityDate,
-        kmUser.userMessageToken,
-        kmUser.userNotificationSettings,
-  );
+      UserCoordinates(latitude: 0, longitude: 0, isoCountryCode: "", administrativeArea: "", locality: "", subLocality: "", postalCode: ""),
+      kmUser.userName,
+      "",
+      kmUser.userTitle,
+      kmUser.userUid,
+      kmUser.userExperiencePoints,
+      kmUser.userLevel,
+      kmUser.userBlockedMap,
+      kmUser.userHasBanned,
+      kmUser.userAvatar,
+      kmUser.userIsOnline,
+      kmUser.userLastActivityDate,
+      kmUser.userMessageToken,
+      kmUser.userNotificationSettings,
+    );
 
     payLoad = {
       "system_chat_setting": kmSystemSettings.chatDistance,
-      "km_user":jsonEncode(kmUser.toJson()),
+      "km_user": jsonEncode(kmUser.toJson()),
       "system_user": jsonEncode(systemUser.toJson()),
     };
 
@@ -471,13 +514,9 @@ class FirestoreOperations {
   }
 
   static Future<bool> apiRequest(String apiLink, dynamic payLoad) async {
-      
     var client = http.Client();
 
     var uriIE = Uri.parse(apiLink);
- 
-
-    
 
     var response = await client.put(uriIE, body: payLoad);
     print(response.statusCode);

@@ -22,7 +22,7 @@ class UserBlockedMap {
 
   Map<String, dynamic> toJson() => {
         "user_name": userName,
-        "blocked_date": blockedDate,
+        "blocked_date": blockedDate.millisecondsSinceEpoch,
         "user_uid": userUid,
         "target_message": targetMessage,
       };
