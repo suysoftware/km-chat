@@ -17,4 +17,7 @@ class RestApiConstants {
   static String API_LINK_SEND_MESSAGE_TO_PUBLIC = dotenv.env['API_LINK_SEND_MESSAGE_TO_PUBLIC'].toString();
   static String API_LINK_SEND_MESSAGE_TO_PRIVATE = dotenv.env['API_LINK_SEND_MESSAGE_TO_PRIVATE'].toString();
   static String API_LINK_SEND_MESSAGE_TO_BOT = dotenv.env['API_LINK_SEND_MESSAGE_TO_BOT'].toString();
+  static String API_LINK_CLEAN_KM_BOT_CHAT = dotenv.env['API_LINK_CLEAN_KM_BOT_CHAT'].toString();
+  static String API_LINK_SEND_MESSAGE_TO_ART_BOT = dotenv.env['API_LINK_SEND_MESSAGE_TO_ART_BOT'].toString();
+  static String API_LINK_CLEAN_TARGET_PRIVATE_CHAT = dotenv.env['API_LINK_CLEAN_TARGET_PRIVATE_CHAT'].toString();
 }

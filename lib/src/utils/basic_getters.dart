@@ -107,6 +107,8 @@ class BasicGetters {
         return StyleConstants.masterTextStyle;
       case "pleb":
         return StyleConstants.plebTextStyle;
+      case "bot":
+        return StyleConstants.privateMessageTextStyle;
       default:
         return StyleConstants.plebTextStyle;
     }
@@ -124,6 +126,8 @@ class BasicGetters {
         return StyleConstants.masterNameTextStyle;
       case "pleb":
         return StyleConstants.plebNameTextStyle;
+      case "bot":
+        return StyleConstants.privateMessageTextStyle;
       default:
         return StyleConstants.plebNameTextStyle;
     }
@@ -144,7 +148,7 @@ class BasicGetters {
     }
   }
 
-  static Future<List<KmChatMessage>> chatFilteredMessagesGetter(List<KmChatMessage> kmChatList, KmUser myUserModel) async {
+  static Future<List<KmChatMessage>> chatFilteredMessagesGetter(List<KmChatMessage> kmChatList, KmUser myUserModel,String privateRefNo,bool isPrivate) async {
     var kmChatFilteredList = <KmChatMessage>[];
     var dateTime = DateTime.now().millisecondsSinceEpoch;
 
@@ -164,7 +168,18 @@ class BasicGetters {
           Vibration.vibrate(duration: 40);
         }*/
 
-        if (chatMessage.senderUser.userTitle == "system" && dateTime - chatMessage.userMessageTime.millisecondsSinceEpoch > 30000) {
+       if(isPrivate){
+        if(privateRefNo==chatMessage.senderUser.userUid&&chatMessage.senderUser.userTitle!="system"){
+          kmChatFilteredList.add(chatMessage);
+        }
+        else if(chatMessage.senderUser.userUid==myUserModel.userUid&&chatMessage.recieverUser.userUid==privateRefNo&&chatMessage.recieverUser.userTitle!="system"){
+          kmChatFilteredList.add(chatMessage);
+
+        }
+
+       }
+       else{
+         if (chatMessage.senderUser.userTitle == "system" && dateTime - chatMessage.userMessageTime.millisecondsSinceEpoch > 30000) {
           // ignore: prefer_is_empty
           if (kmChatFilteredList.length < 1) {
             kmChatFilteredList.add(chatMessage);
@@ -172,6 +187,7 @@ class BasicGetters {
         } else {
           kmChatFilteredList.add(chatMessage);
         }
+       }
       }
     }
 
@@ -197,9 +213,9 @@ class BasicGetters {
       case 'district':
         return userCoordinates.locality;
       case 'postal':
-        return "null";
+        return "1 KM";
       default: //postal
-        return "null";
+        return "1 KM";
     }
   }
 
@@ -208,7 +224,7 @@ class BasicGetters {
       case "public":
         return "assets/svg/earth.svg";
       case "private":
-        return "assets/svg/earth.svg";
+        return "assets/svg/private_message_icon.svg";
       case "club":
         return "assets/svg/earth.svg";
       case 'bot':
@@ -233,7 +249,7 @@ class BasicGetters {
         chatSectionEnum: ChatSectionEnum.public,
         messageLength: 0,
         targetName: kmLogoChatDistanceTextGetter(kmSystemSettings.chatDistance, myUserModel.userCoordinates).length < 5
-            ? "${kmLogoChatDistanceTextGetter(kmSystemSettings.chatDistance, myUserModel.userCoordinates)} - Public"
+            ? "${kmLogoChatDistanceTextGetter(kmSystemSettings.chatDistance, myUserModel.userCoordinates)} /Public"
             : kmLogoChatDistanceTextGetter(kmSystemSettings.chatDistance, myUserModel.userCoordinates),
         targetUid: "Public",
         lastActivityDate: Timestamp.fromMillisecondsSinceEpoch(DateTime.now().millisecondsSinceEpoch),
@@ -252,7 +268,7 @@ class BasicGetters {
           //  kmChatFilteredList.add(chatMessage.data());
           //}
         } else {
-          if (chatMessage.senderUser.userTitle != "system") {
+          if (chatMessage.senderUser.userTitle != "system"&&chatMessage.senderUser.userAvatar != "public") {
             var targetUserUid;
             var firstModel;
             if (chatMessage.senderUser.userUid == myUserModel.userUid) {
@@ -308,7 +324,10 @@ class BasicGetters {
           recognizer: LongPressGestureRecognizer()
             ..onLongPress = () {
               HapticFeedback.vibrate();
-              if (kmChatMessage.senderUser.userTitle != "system" && kmChatMessage.senderUser.userTitle != "admin" && kmChatMessage.senderUser.userUid != myUid&&kmChatMessage.senderUser.userTitle!="bot") {
+              if (kmChatMessage.senderUser.userTitle != "system" &&
+                  kmChatMessage.senderUser.userTitle != "admin" &&
+                  kmChatMessage.senderUser.userUid != myUid &&
+                  kmChatMessage.senderUser.userTitle != "bot") {
                 showCupertinoDialog(barrierDismissible: true, context: context, builder: (context) => ProfileDialog(kmChatMessage: kmChatMessage));
               }
             },

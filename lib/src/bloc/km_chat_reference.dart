@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:one_km/main.dart';
 import 'package:one_km/src/models/km_chat_reference_model.dart';
 import 'package:one_km/src/models/km_system_settings.dart';
 import 'package:one_km/src/models/user_coordinates.dart';
@@ -37,19 +38,19 @@ class KmChatReferenceCubit extends Cubit<KmChatReferenceModel> {
     emit(newReferenceModel);
   }
 
-  void goPrivate(String userUid, String targetName) {
+  void goPrivate(String myUid,String targetUid, String targetName) {
     var newReferenceModel = KmChatReferenceModel(
         chatSectionEnum: ChatSectionEnum.private,
         chatReference: FirebaseFirestore.instance
             .collection("private_chat")
-            .doc(userUid)
+            .doc(myUid)
             .collection('chat_pool')
             .withConverter(fromFirestore: (snapshot, _) => KmChatMessage.fromJson(snapshot.data()!), toFirestore: (kmchat, _) => kmchat.toJson())
             .orderBy('user_message_time', descending: false)
             .snapshots(),
-        chatTargetNo: userUid,
+        chatTargetNo: targetUid,
         chatTargetName: targetName);
-
+   
     emit(newReferenceModel);
   }
     void refresh(String userUid, String targetName) {
@@ -81,7 +82,7 @@ class KmChatReferenceCubit extends Cubit<KmChatReferenceModel> {
             .doc(userUid)
             .collection('bot_chat')
             .withConverter(fromFirestore: (snapshot, _) => KmChatMessage.fromJson(snapshot.data()!), toFirestore: (kmchat, _) => kmchat.toJson())
-            .orderBy('user_message_time', descending: false)
+            .orderBy('user_message_time', descending: false).limitToLast(20)
             .snapshots(),
         chatTargetNo: userUid,
         chatTargetName: "Bot");

@@ -1,6 +1,7 @@
 // ignore_for_file: unused_field, duplicate_ignore, prefer_typing_uninitialized_variables, unused_local_variable
 
 import 'dart:async';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:one_km/main.dart';
 import 'package:one_km/src/bloc/km_chat_reference.dart';
 import 'package:one_km/src/bloc/km_system_settings_cubit.dart';
 import 'package:one_km/src/bloc/km_user_cubit.dart';
@@ -38,7 +40,7 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   // ignore: unused_field
   String _connectionStatus = 'Unknown';
   bool _connectionBool = true;
@@ -47,11 +49,21 @@ class _ChatScreenState extends State<ChatScreen> {
   bool publicNotification = false;
   var chatRef;
   var messageController = TextEditingController();
+  late AnimationController topIconAnimationController;
+  late Animation<double> topIconRotateAnimationValue;
+
+  late AnimationController botSectionArrowAnimationController;
+  late Animation<double> botSectionArrowRotateAnimationValue;
+  late Animation<double> botSectionChatTypeSelectAnimationValue;
+  late Animation<double> botSectionChatTypeSelectOpacityAnimationValue;
+  late Animation<double> botSectionChatTypeSelectContainerWidthAnimationValue;
 
   var privateMessageTargetUid = "";
   var privateMessageTargetName = "";
   var recieverUser;
   FocusNode textFieldFocusNode = FocusNode();
+
+  bool isChat = true;
 
   chatTextFieldOnChangeOperation(String value) {
     setState(() {
@@ -66,6 +78,22 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  botSectionColorGetter(bool typeChat) {
+    if (typeChat) {
+      if (isChat) {
+        return ColorConstants.designGreen.withOpacity(0.2);
+      } else {
+        return ColorConstants.transparentColor;
+      }
+    } else {
+      if (isChat == false) {
+        return ColorConstants.designGreen.withOpacity(0.2);
+      } else {
+        return ColorConstants.transparentColor;
+      }
+    }
+  }
+
   Future<void> whiteRabbitButtonOperation(String chatSectionEnumName, String targetName, String targetUid, List<KmChatMessage> kmChatMessages) async {
     var textFieldData = messageController.text;
     messageController.clear();
@@ -75,12 +103,24 @@ class _ChatScreenState extends State<ChatScreen> {
         await FirestoreOperations.sendMessageToPublic(textFieldData, context.read<KmUserCubit>().state, publicNotification, context.read<KmSystemSettingsCubit>().state);
         break;
       case "private":
+        print(recieverUser.userUid + " RECIEVER");
         await FirestoreOperations.sendMessageToPrivate(textFieldData, context.read<KmUserCubit>().state, recieverUser);
         break;
       case "club":
         break;
       case "bot":
-        await FirestoreOperations.sendMessageToBot(textFieldData, context.read<KmUserCubit>().state, kmChatMessages);
+        //animation start
+        topIconAnimationController.forward();
+        botSectionArrowAnimationController.forward();
+        if (isChat) {
+          await FirestoreOperations.sendMessageToBot(textFieldData, context.read<KmUserCubit>().state, kmChatMessages);
+        } else {
+          await FirestoreOperations.sendMessageToArtBot(textFieldData, context.read<KmUserCubit>().state);
+        }
+        topIconAnimationController.stop();
+        topIconAnimationController.reset();
+
+        // animation stop
         break;
       default:
     }
@@ -157,10 +197,69 @@ class _ChatScreenState extends State<ChatScreen> {
 
     initConnectivity();
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    topIconAnimationController = AnimationController(duration: const Duration(milliseconds: 3000), vsync: this);
+    botSectionArrowAnimationController = AnimationController(duration: const Duration(milliseconds: 200), vsync: this);
+    topIconRotateAnimationValue = Tween(begin: 0.0, end: 3.4 * 2.0).animate(topIconAnimationController)
+      ..addListener(() {
+        setState(() {});
+      });
+    botSectionArrowRotateAnimationValue = Tween(begin: 0.0, end: pi * 1).animate(botSectionArrowAnimationController)
+      ..addListener(() {
+        setState(() {});
+      });
+    botSectionChatTypeSelectAnimationValue = Tween(begin: 0.0, end: 100.0).animate(botSectionArrowAnimationController)
+      ..addListener(() {
+        setState(() {});
+      });
+    botSectionChatTypeSelectOpacityAnimationValue = Tween(begin: 100.0, end: 0.0).animate(botSectionArrowAnimationController)
+      ..addListener(() {
+        setState(() {});
+      });
+    botSectionChatTypeSelectContainerWidthAnimationValue = Tween(begin: 150.0, end: 50.0).animate(botSectionArrowAnimationController)
+      ..addListener(() {
+        setState(() {});
+      });
 
     chatRef = BasicGetters.chatStreamReferenceGetter(context.read<KmUserCubit>().state.userCoordinates, context.read<KmSystemSettingsCubit>().state);
     context.read<KmChatReferenceCubit>().goPublic(context.read<KmUserCubit>().state.userCoordinates, context.read<KmSystemSettingsCubit>().state);
     FirestoreOperations.joinRoomRequest(context.read<KmUserCubit>().state, context.read<KmSystemSettingsCubit>().state);
+
+//
+
+  
+
+    FirebaseFirestore.instance
+        .collection('private_chat')
+        .doc(context.read<KmUserCubit>().state.userUid)
+        .collection('chat_pool')
+        .where('reciever_user.user_uid', isEqualTo: context.read<KmUserCubit>().state.userUid)
+        .withConverter(fromFirestore: (snapshot, _) => KmChatMessage.fromJson(snapshot.data()!), toFirestore: (kmchat, _) => kmchat.toJson())
+        .snapshots()
+        .listen((event) {
+      for (var change in event.docChanges) {
+        switch (change.type) {
+          case DocumentChangeType.added:
+            if (change.doc.data()!.senderUser.userUid != context.read<KmUserCubit>().state.userUid) {
+              HapticFeedback.vibrate();
+              prefsHelper.addNewUnreadUser(change.doc.data()!.senderUser.userUid);
+            }
+            break;
+          case DocumentChangeType.modified:
+            break;
+          case DocumentChangeType.removed:
+            break;
+        }
+      }
+    });
+
+//
+  }
+
+  @override
+  void dispose() {
+    topIconAnimationController.dispose();
+    botSectionArrowAnimationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -173,10 +272,10 @@ class _ChatScreenState extends State<ChatScreen> {
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SizedBox(
-                      height: 4.h,
+                    Transform.rotate(
+                      angle: topIconRotateAnimationValue.value,
+                      child: KmButton(),
                     ),
-                    KmButton(),
                     SizedBox(
                       height: 1.h,
                     ),
@@ -249,10 +348,11 @@ class _ChatScreenState extends State<ChatScreen> {
               var dataCome = snapshot.requireData;
 
               var convertedData = BasicGetters.chatMessageQuerySnapshotToList(dataCome);
+              print(refBloc.chatTargetNo);
 
               return BlocBuilder<KmUserCubit, KmUser>(builder: (context, snapshotBloc) {
                 return FutureBuilder(
-                    future: BasicGetters.chatFilteredMessagesGetter(convertedData, snapshotBloc),
+                    future: BasicGetters.chatFilteredMessagesGetter(convertedData, snapshotBloc, refBloc.chatTargetNo, refBloc.chatSectionEnum.name == "private" ? true : false),
                     builder: (context, snap) {
                       if (snap.hasData) {
                         var snapData = snap.data!;
@@ -285,6 +385,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                     return snapData.isNotEmpty ? ChatItem(kmChatMessage: snapData[indeks], kmUser: kmUser, replyOperation: _replyOperation) : const SizedBox();
                                   }),
                             ),
+                            refBloc.chatSectionEnum.name == "bot" ? botChatTypeSelectArea() : SizedBox(),
+                            refBloc.chatSectionEnum.name == "bot" ? botChatTypeArrowButton() : SizedBox(),
                             ChatTargetSection(),
                             SizedBox(
                               height: 10,
@@ -309,5 +411,82 @@ class _ChatScreenState extends State<ChatScreen> {
             }
           });
     }));
+  }
+
+  botChatTypeSelectArea() {
+    return botSectionChatTypeSelectOpacityAnimationValue.value != 0
+        ? Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Opacity(
+              opacity: botSectionChatTypeSelectOpacityAnimationValue.value / 100,
+              child: Transform.translate(
+                offset: Offset(0, botSectionChatTypeSelectAnimationValue.value),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          botSectionArrowAnimationController.forward();
+                          isChat = true;
+                          print("chat");
+                        });
+                      },
+                      child: Container(
+                        width: botSectionChatTypeSelectContainerWidthAnimationValue.value,
+                        height: 40,
+                        child: Center(child: Text("Chat")),
+                        decoration: BoxDecoration(
+                          color: botSectionColorGetter(true),
+                          border: Border(
+                              bottom: BorderSide(color: ColorConstants.designGreen, width: 2),
+                              left: BorderSide(color: ColorConstants.designGreen, width: 2),
+                              top: BorderSide(color: ColorConstants.designGreen, width: 2)),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          botSectionArrowAnimationController.forward();
+                          isChat = false;
+                          print("art");
+                          //seceneği kapat
+                        });
+                      },
+                      child: Container(
+                        width: botSectionChatTypeSelectContainerWidthAnimationValue.value,
+                        height: 40,
+                        child: Center(child: Text("Art")),
+                        decoration: BoxDecoration(
+                          color: botSectionColorGetter(false),
+                          border: Border(
+                              bottom: BorderSide(color: ColorConstants.designGreen, width: 2),
+                              right: BorderSide(color: ColorConstants.designGreen, width: 2),
+                              top: BorderSide(color: ColorConstants.designGreen, width: 2)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ))
+        : SizedBox();
+  }
+
+  botChatTypeArrowButton() {
+    return Transform.rotate(
+        angle: botSectionArrowRotateAnimationValue.value,
+        child: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () {
+            if (botSectionArrowAnimationController.isCompleted) {
+              botSectionArrowAnimationController.reverse();
+            } else {
+              botSectionArrowAnimationController.forward();
+            }
+          },
+          child: Icon(CupertinoIcons.chevron_down),
+        ));
   }
 }

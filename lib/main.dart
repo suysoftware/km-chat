@@ -15,6 +15,7 @@ import 'package:one_km/src/bloc/km_system_settings_cubit.dart';
 import 'package:one_km/src/bloc/km_user_cubit.dart';
 import 'package:one_km/src/screens/login_screen.dart';
 import 'package:one_km/src/services/firestore_operations.dart';
+import 'package:one_km/src/utils/SharedPreferencesHelper.dart';
 import 'package:sizer/sizer.dart';
 import 'src/constants/color_constants.dart';
 import 'src/screens/chat/chat_screen.dart';
@@ -24,7 +25,7 @@ import 'src/services/firebase_options.dart';
 bool isLogged = false;
 var kmUser;
 var systemSettings;
-
+SharedPreferencesHelper prefsHelper = SharedPreferencesHelper();
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 Future<void> appTracking() async {
   if (await AppTrackingTransparency.trackingAuthorizationStatus == TrackingStatus.notDetermined) {
@@ -42,7 +43,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // make sure you call `initializeApp` before using other Firebase services.
   //mesaj kategori ve tiplerini ayarla
   // ignore: avoid_print
+  print("aha bildirim");
   print('Handling a background message ${message.messageId}');
+
   await Firebase.initializeApp();
 }
 
@@ -78,7 +81,7 @@ class KmApp extends StatelessWidget {
           BlocProvider(
             create: (context) => KmSystemSettingsCubit(),
           ),
-            BlocProvider(
+          BlocProvider(
             create: (context) => KmChatReferenceCubit(),
           ),
         ], child: const _cupertinoApp()),

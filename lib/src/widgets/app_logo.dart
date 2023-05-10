@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:one_km/src/bloc/km_chat_reference.dart';
 import 'package:one_km/src/constants/color_constants.dart';
 import 'package:one_km/src/models/km_chat_section.dart';
@@ -59,8 +61,22 @@ Widget appLogo(double Sizex, KmSystemSettings kmSystemSettings, UserCoordinates 
       ? Padding(
           padding: EdgeInsets.only(top: 4.h),
           child: Image.asset(
-            "assets/images/ai_anim.gif",
+            "assets/images/brain.gif",
+            height: 100,
+            width: 100,
           ),
+          /*Container(
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+                //lerp border
+                border: Border.lerp(Border(bottom: BorderSide()), Border(bottom: BorderSide()), 0.5),
+                borderRadius: BorderRadius.circular(200)),
+            child: SvgPicture.asset(
+              "assets/svg/ai_icon.svg",
+              height: 100,
+              width: 100,
+            ),
+          ),*/
         )
       : Container(
           margin: EdgeInsets.all(8.0 * Sizex),

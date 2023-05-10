@@ -3,10 +3,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:one_km/main.dart';
 import 'package:one_km/src/bloc/km_chat_reference.dart';
 import 'package:one_km/src/bloc/km_system_settings_cubit.dart';
 import 'package:one_km/src/bloc/km_user_cubit.dart';
 import 'package:one_km/src/constants/color_constants.dart';
+import 'package:one_km/src/dialogs/alert_dialogs.dart';
 import 'package:one_km/src/models/km_chat_section.dart';
 import 'package:one_km/src/models/user_coordinates.dart';
 import 'package:sizer/sizer.dart';
@@ -60,49 +62,7 @@ class ChatTargetSection extends StatelessWidget {
                               padding: EdgeInsets.zero,
                               itemCount: kmSectionList.length,
                               itemBuilder: (context, indeks) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    switch (kmSectionList[indeks].chatSectionEnum) {
-                                      case ChatSectionEnum.public:
-                                        context.read<KmChatReferenceCubit>().goPublic(snapshotBloc.userCoordinates, context.read<KmSystemSettingsCubit>().state);
-                                        break;
-                                      case ChatSectionEnum.private:
-                                        context.read<KmChatReferenceCubit>().goPrivate(kmSectionList[indeks].targetUid, kmSectionList[indeks].targetName);
-                                        break;
-                                      case ChatSectionEnum.club:
-                                        context.read<KmChatReferenceCubit>().goClub(kmSectionList[indeks].targetUid, "Club");
-                                        break;
-                                      case ChatSectionEnum.bot:
-                                        context.read<KmChatReferenceCubit>().goBot(snapshotBloc.userUid);
-                                        break;
-                                      default:
-                                    }
-                                  },
-                                  child: Container(
-                                    height: 50,
-                                    width: 220,
-                                    padding: EdgeInsets.all(5),
-                                    decoration: BoxDecoration(
-                                        color: sectionColorGetter(
-                                            refBloc.chatSectionEnum.name, kmSectionList[indeks].chatSectionEnum.name, refBloc.chatTargetNo, kmSectionList[indeks].targetUid),
-                                        border: Border.all(color: ColorConstants.juniorColor, width: 2)),
-                                    child: Center(
-                                        child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        SvgPicture.asset(
-                                          BasicGetters.sectionBarIconGetter(kmSectionList[indeks].chatSectionEnum.name),
-                                          width: 18,
-                                          height: 18,
-                                          color: ColorConstants.designGreen,
-                                        ),
-                                        SizedBox(width: 10),
-                                        Text(kmSectionList[indeks].targetName.length > 11 ? kmSectionList[indeks].targetName.substring(0, 10) : kmSectionList[indeks].targetName,
-                                            style: TextStyle(color: ColorConstants.juniorColor, fontSize: 17)),
-                                      ],
-                                    )),
-                                  ),
-                                );
+                                return targetSectionItem(context, indeks, kmSectionList, snapshotBloc, refBloc);
                               },
                             ),
                           ),
@@ -125,5 +85,87 @@ class ChatTargetSection extends StatelessWidget {
     } else {
       return ColorConstants.transparentColor;
     }
+  }
+
+  targetSectionItem(BuildContext context, int indeks, List<KmChatSection> kmSectionList, KmUser kmUser, KmChatReferenceModel refBloc) {
+    return StreamBuilder<String>(
+        stream: prefsHelper.onDataChanged,
+        builder: (BuildContext context, AsyncSnapshot<String> targetShared) {
+          return FutureBuilder<List<String>?>(
+              future: prefsHelper.getUnreadUser(),
+              builder: (BuildContext context, AsyncSnapshot<List<String>?> unreadList) {
+                var borderColor = ColorConstants.designGreen;
+
+                if (unreadList.data != null) {
+         
+                  var unreadListData = unreadList.data;
+
+                  if (unreadListData != null) {
+                
+         
+                    if (unreadListData.contains(kmSectionList[indeks].targetUid)) {
+                      borderColor = ColorConstants.masterColor;
+                    } else {
+                      borderColor = ColorConstants.designGreen;
+                    }
+                  }
+                } else {
+      
+                }
+
+                return GestureDetector(
+                  onTap: () {
+                    switch (kmSectionList[indeks].chatSectionEnum) {
+                      case ChatSectionEnum.public:
+                        context.read<KmChatReferenceCubit>().goPublic(kmUser.userCoordinates, context.read<KmSystemSettingsCubit>().state);
+                        break;
+                      case ChatSectionEnum.private:
+                        if (kmSectionList[indeks].targetUid != refBloc.chatTargetNo) {
+                          context.read<KmChatReferenceCubit>().goPrivate(kmUser.userUid, kmSectionList[indeks].targetUid, kmSectionList[indeks].targetName);
+                          prefsHelper.removeUnreadUser(kmSectionList[indeks].targetUid);
+                        } else {
+                     
+                          AlertDialogs.clearChatDialog(kmUser, refBloc.chatTargetNo, context, context.read<KmSystemSettingsCubit>().state);
+                        }
+                        break;
+                      case ChatSectionEnum.club:
+                        context.read<KmChatReferenceCubit>().goClub(kmSectionList[indeks].targetUid, "Club");
+                        break;
+                      case ChatSectionEnum.bot:
+                        context.read<KmChatReferenceCubit>().goBot(kmUser.userUid);
+                        break;
+                      default:
+                    }
+                  },
+                  child: Container(
+                    height: 50,
+                    width: 220,
+                    padding: EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                        color: sectionColorGetter(refBloc.chatSectionEnum.name, kmSectionList[indeks].chatSectionEnum.name, refBloc.chatTargetNo, kmSectionList[indeks].targetUid),
+                        border: Border.all(color: borderColor, width: 2)),
+                    child: Center(
+                        child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          BasicGetters.sectionBarIconGetter(kmSectionList[indeks].chatSectionEnum.name),
+                          width: 18,
+                          height: 18,
+                          color: ColorConstants.designGreen,
+                        ),
+                        SizedBox(width: 8),
+                        Text(kmSectionList[indeks].targetName.length >= 11 ? kmSectionList[indeks].targetName.substring(0, 10) : kmSectionList[indeks].targetName,
+                            style: TextStyle(color: ColorConstants.juniorColor, fontSize: 17)),
+                        SizedBox(width: 2),
+                        kmSectionList[indeks].chatSectionEnum.name == "public" || kmSectionList[indeks].chatSectionEnum.name == "bot"
+                            ? SizedBox()
+                            : Icon(CupertinoIcons.xmark, color: ColorConstants.juniorColor, size: 15),
+                      ],
+                    )),
+                  ),
+                );
+              });
+        });
   }
 }

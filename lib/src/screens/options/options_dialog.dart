@@ -18,6 +18,8 @@ import 'package:one_km/src/screens/options/spam/spam_list_dialog.dart';
 import 'package:one_km/src/widgets/mini_widget.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../services/firestore_operations.dart';
+
 enum Availability { loading, available, unavailable }
 
 class OptionsDialog extends StatefulWidget {
@@ -49,8 +51,7 @@ class _OptionsDialogState extends State<OptionsDialog> {
           // This plugin cannot be tested on Android by installing your app
           // locally. See https://github.com/britannio/in_app_review#testing for
           // more information.
-          _availability =
-              isAvailable ? Availability.available : Availability.unavailable;
+          _availability = isAvailable ? Availability.available : Availability.unavailable;
         });
       } catch (e) {
         setState(() => _availability = Availability.unavailable);
@@ -65,34 +66,41 @@ class _OptionsDialogState extends State<OptionsDialog> {
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            optionButton('/profile       ', () => profileFunction(context)),
-            optionButton('/howtouse      ', () => howToUseFunction(context)),
+            optionButton('/profile', () => profileFunction(context)),
+            optionButton('/howtouse', () => howToUseFunction(context)),
             BlocBuilder<KmUserCubit, KmUser>(builder: (context, snapshotBloc) {
-              return optionButton(
-                  '/spamlist [${snapshotBloc.userBlockedMap.entries.length}]  ',
-                  () => blockListFunction(context, snapshotBloc));
+              return optionButton('/spamlist [${snapshotBloc.userBlockedMap.entries.length}]', () => blockListFunction(context, snapshotBloc));
             }),
             optionButton('/Account Revive', () => reviveFunction(context)),
             optionButton('/Notifications', () => notificationFunction(context)),
-            optionButton('/Rate Us!     ', () => rateUsFunction()),
+            optionButton('/Clean Bot-Chat', () => cleanChatFunction()),
+            optionButton('/Rate Us!', () => rateUsFunction()),
             SizedBox(
               height: 4.h,
             ),
-            MiniWidgets.closeButton(context, null)
+            Center(child: MiniWidgets.closeButton(context, null))
           ],
         ),
       ),
     );
   }
 
-  TextButton optionButton(String text, Function() func) {
-    return TextButton(
-        child: Text(
-          text,
-          style: StyleConstants.optionsButtonTextStyle,
+  optionButton(String text, Function() func) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 22.w,
         ),
-        onPressed: func);
+        TextButton(
+            child: Text(
+              text,
+              style: StyleConstants.optionsButtonTextStyle,
+            ),
+            onPressed: func),
+      ],
+    );
   }
 
   profileFunction(BuildContext context) {
@@ -133,8 +141,7 @@ class _OptionsDialogState extends State<OptionsDialog> {
         });
   }
 
-  Future<void> rateUsFunction() =>
-      _inAppReview.requestReview().whenComplete(() async {
+  Future<void> rateUsFunction() => _inAppReview.requestReview().whenComplete(() async {
         try {
           final isAvailable = await _inAppReview.isAvailable();
 
@@ -143,9 +150,7 @@ class _OptionsDialogState extends State<OptionsDialog> {
             FirebaseAuth auth = FirebaseAuth.instance;
           }
           setState(() {
-            _availability = isAvailable && !Platform.isAndroid
-                ? Availability.available
-                : Availability.unavailable;
+            _availability = isAvailable && !Platform.isAndroid ? Availability.available : Availability.unavailable;
           });
         } catch (e) {
           setState(() => _availability = Availability.unavailable);
@@ -163,5 +168,9 @@ class _OptionsDialogState extends State<OptionsDialog> {
             return SpamList(kmUser: kmUserNew);
           });
     }
+  }
+
+  cleanChatFunction() async {
+    await FirestoreOperations.cleanKmBotChatRequest(widget.kmUser.userUid);
   }
 }

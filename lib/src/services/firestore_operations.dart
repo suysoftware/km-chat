@@ -17,6 +17,7 @@ import 'package:one_km/src/models/user_coordinates.dart';
 import 'package:one_km/src/services/rest_api_constants.dart';
 import 'package:one_km/src/utils/basic_getters.dart';
 import 'package:uuid/uuid.dart';
+import '../../main.dart';
 import 'firebase_auth_service.dart';
 
 class FirestoreOperations {
@@ -118,17 +119,24 @@ class FirestoreOperations {
     return userGeo;
   }
 
-  static Future<void> sendMessageToBot(String userMessage, KmUser kmUser, List<KmChatMessage> kmChatMessageList) async {
-    int spaceValue = 0;
+  static Future<bool> sendMessageToArtBot(String userMessage, KmUser kmUser) async {
+    var botUser = KmUser.withInfo(kmUser.userCoordinates, "KM-BOT", "", "bot", "", 0, 0, kmUser.userBlockedMap, false, "ai_image_answer", true, kmUser.userLastActivityDate, "",
+        kmUser.userNotificationSettings);
 
-    /* for (var i = 0; i < userMessage.length; i++) {
-      if (userMessage[i] == " ") {
-        spaceValue = spaceValue + 1;
-      }
-    }*/
-    if (userMessage.length < 1 || userMessage.length - spaceValue <= spaceValue) {
-      return;
+    var payLoad;
+
+    payLoad = {"km_user": jsonEncode(kmUser.toJson()), "km_bot_user": jsonEncode(botUser.toJson()), "user_message": userMessage};
+    try {
+      var result = await apiRequest(RestApiConstants.API_LINK_SEND_MESSAGE_TO_ART_BOT, payLoad);
+
+      return result;
+    } catch (e) {
+      print(e);
+      return false;
     }
+  }
+
+  static Future<bool> sendMessageToBot(String userMessage, KmUser kmUser, List<KmChatMessage> kmChatMessageList) async {
     var kmChatBotMessageList = <KmChatBotMessage>[];
 
     for (var element in kmChatMessageList) {
@@ -146,28 +154,45 @@ class FirestoreOperations {
 
     var payLoad;
 
-  
     payLoad = {
       "km_user": jsonEncode(kmUser.toJson()),
       "km_chat_bot_message_list": jsonEncode(kmChatBotMessageList),
-      "bot_user": jsonEncode(botUser.toJson()),
+      "km_bot_user": jsonEncode(botUser.toJson()),
+      "user_message": userMessage
     };
     try {
-      await apiRequest(RestApiConstants.API_LINK_SEND_MESSAGE_TO_BOT, payLoad);
+      var result = await apiRequest(RestApiConstants.API_LINK_SEND_MESSAGE_TO_BOT, payLoad);
+
+      return result;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  static Future<void> cleanKmBotChatRequest(String userUid) async {
+    var payLoad;
+    payLoad = {"user_uid": userUid};
+    try {
+      await apiRequest(RestApiConstants.API_LINK_CLEAN_KM_BOT_CHAT, payLoad);
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  static Future<void> cleanTargetPrivateChatRequest(String userUid, String targetUid) async {
+    var payLoad;
+    payLoad = {"user_uid": userUid, "target_uid": targetUid};
+    try {
+      await apiRequest(RestApiConstants.API_LINK_CLEAN_TARGET_PRIVATE_CHAT, payLoad);
     } catch (e) {
       print(e);
     }
   }
 
   static Future<void> sendMessageToPrivate(String userMessage, KmUser kmUser, KmUser recieverUser) async {
-    int spaceValue = 0;
-
-    /* for (var i = 0; i < userMessage.length; i++) {
-      if (userMessage[i] == " ") {
-        spaceValue = spaceValue + 1;
-      }
-    }*/
-    if (userMessage.length < 1 || userMessage.length - spaceValue <= spaceValue) {
+    print(recieverUser.userTitle);
+    if (userMessage.length < 1) {
       return;
     }
     var senderUser = KmUser.withInfo(
@@ -229,6 +254,22 @@ class FirestoreOperations {
       kmUser.userMessageToken,
       kmUser.userNotificationSettings,
     );
+    var recieverUser = KmUser.withInfo(
+      UserCoordinates(latitude: 0, longitude: 0, isoCountryCode: "", administrativeArea: "", locality: "", subLocality: "", postalCode: ""),
+      kmUser.userName,
+      "",
+      kmUser.userTitle,
+      kmUser.userUid,
+      kmUser.userExperiencePoints,
+      kmUser.userLevel,
+      kmUser.userBlockedMap,
+      kmUser.userHasBanned,
+      "public",
+      kmUser.userIsOnline,
+      kmUser.userLastActivityDate,
+      kmUser.userMessageToken,
+      kmUser.userNotificationSettings,
+    );
 
     print(jsonEncode(senderUser.toJson()));
     var payLoad;
@@ -237,6 +278,7 @@ class FirestoreOperations {
       "user_message": userMessage,
       "system_chat_setting": kmSystemSettings.chatDistance,
       "sender_user": jsonEncode(senderUser.toJson()),
+      "reciever_user": jsonEncode(recieverUser.toJson()),
       "km_user": jsonEncode(kmUser.toJson()),
     };
     try {
@@ -502,14 +544,21 @@ class FirestoreOperations {
   static Future<void> tokenUpdateRequest(KmUser kmUser) async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     String? token = await messaging.getToken();
+
+    print(token.toString() + " n rr");
     if (token != null && token != kmUser.userMessageToken) {
+      print(kmUser.userMessageToken + "  MESSAGE TOKEN");
+      print(token + "  MESSAGE TOKEN");
+      print("aga farklı");
       var payLoad;
       payLoad = {
         "user_no": kmUser.userUid,
         "user_message_token": token,
       };
 
-      await apiRequest(RestApiConstants.API_LINK_TOKEN_UPDATE_REQUEST, payLoad);
+      var response = await apiRequest(RestApiConstants.API_LINK_TOKEN_UPDATE_REQUEST, payLoad);
+
+      print(response.toString() + "AGA SONUC");
     }
   }
 

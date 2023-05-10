@@ -6,9 +6,11 @@ import 'package:sizer/sizer.dart';
 
 class WhiteRabbitButton extends StatelessWidget {
   final void Function() whiteRabbitButtonOperation;
+
   const WhiteRabbitButton({
     Key? key,
     required this.whiteRabbitButtonOperation,
+
   }) : super(key: key);
 
   @override
@@ -21,7 +23,7 @@ class WhiteRabbitButton extends StatelessWidget {
             "assets/images/white_rabbit.png",
             color: ColorConstants.designGreen,
           )),
-      onPressed:whiteRabbitButtonOperation,
+      onPressed: whiteRabbitButtonOperation,
     );
   }
 }
