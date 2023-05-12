@@ -131,7 +131,7 @@ class ChatTargetSection extends StatelessWidget {
                   child: Container(
                     height: 50,
                     width: 220,
-                    padding:const EdgeInsets.all(5),
+                    padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
                         color: sectionColorGetter(refBloc.chatSectionEnum.name, kmSectionList[indeks].chatSectionEnum.name, refBloc.chatTargetNo, kmSectionList[indeks].targetUid),
                         border: Border.all(color: borderColor, width: 2)),
@@ -145,10 +145,10 @@ class ChatTargetSection extends StatelessWidget {
                           height: 18,
                           color: ColorConstants.designGreen,
                         ),
-                      const  SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text(kmSectionList[indeks].targetName.length >= 11 ? kmSectionList[indeks].targetName.substring(0, 10) : kmSectionList[indeks].targetName,
                             style: const TextStyle(color: ColorConstants.juniorColor, fontSize: 17)),
-                       const SizedBox(width: 2),
+                        const SizedBox(width: 2),
                         kmSectionList[indeks].chatSectionEnum.name == "public" || kmSectionList[indeks].chatSectionEnum.name == "bot"
                             ? const SizedBox()
                             : const Icon(CupertinoIcons.xmark, color: ColorConstants.juniorColor, size: 15),

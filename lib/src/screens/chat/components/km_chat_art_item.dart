@@ -45,12 +45,6 @@ class KmChatArtItem extends StatelessWidget {
           const Spacer(
             flex: 2,
           ),
-          CupertinoButton(
-              child: const Icon(
-                CupertinoIcons.cloud_download,
-                color: ColorConstants.systemColor,
-              ),
-              onPressed: () {}),
           const Spacer(
             flex: 1,
           )

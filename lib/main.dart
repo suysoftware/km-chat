@@ -38,14 +38,7 @@ Future<void> appTracking() async {
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  if (message.notification != null) {
-    print("faf");
-    print(message.notification!.body);
-    print(message.notification!.title);
-  }
-  print("s");
-
-  print('Handling a background message ${message.messageId}');
+  //print('Handling a background message ${message.messageId}');
 
   await Firebase.initializeApp();
 }
@@ -102,24 +95,20 @@ class __cupertinoAppState extends State<_cupertinoApp> with WidgetsBindingObserv
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   Future<void> _firebaseMessagingOnMessageHandler(RemoteMessage message) async {
-    print("aaa");
     RemoteNotification? notification = message.notification;
     messaging.setForegroundNotificationPresentationOptions(alert: false, badge: false, sound: false);
 //uygulamada iken
   }
 
   Future<void> _firebaseMessagingOpenedAppHandler(RemoteMessage message) async {
-  
     if (message.data["notiCategoryDetail"] == "private_message") {
       var senderUid = message.data["senderUserUid"];
       var senderName = message.data["senderUserName"];
 
       context.read<KmChatReferenceCubit>().goPrivate(context.read<KmUserCubit>().state.userUid, senderUid, senderName);
       prefsHelper.removeUnreadUser(senderUid);
-    }
-    else if (message.data["notiCategoryDetail"] == "public_message"){
-
-      context.read<KmChatReferenceCubit>().goPublic(context.read<KmUserCubit>().state.userCoordinates,context.read<KmSystemSettingsCubit>().state);
+    } else if (message.data["notiCategoryDetail"] == "public_message") {
+      context.read<KmChatReferenceCubit>().goPublic(context.read<KmUserCubit>().state.userCoordinates, context.read<KmSystemSettingsCubit>().state);
     }
 
 //mesaj açıldığında
@@ -154,8 +143,6 @@ class __cupertinoAppState extends State<_cupertinoApp> with WidgetsBindingObserv
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.inactive) {
-      print("inactive");
-      //print('inactive');
       if (kmUser != null && kmUser.userName != "") {
         await FirestoreOperations.activityControl(kmUser, 'offline');
       }
@@ -168,8 +155,6 @@ class __cupertinoAppState extends State<_cupertinoApp> with WidgetsBindingObserv
     }
 
     if (state == AppLifecycleState.paused) {
-      print("paused");
-      //print(" altta atıldı");
       messaging.setForegroundNotificationPresentationOptions(
         alert: true,
         badge: true,
@@ -181,7 +166,6 @@ class __cupertinoAppState extends State<_cupertinoApp> with WidgetsBindingObserv
     }
 
     if (state == AppLifecycleState.resumed) {
-      print("resumed");
       messaging.setForegroundNotificationPresentationOptions(
         alert: false,
         badge: false,
@@ -190,12 +174,9 @@ class __cupertinoAppState extends State<_cupertinoApp> with WidgetsBindingObserv
       if (kmUser != null && kmUser.userName != "") {
         await FirestoreOperations.activityControl(kmUser, 'online');
       }
-
-      //print("alta atıp geri gelince");
     }
 
     if (state == AppLifecycleState.detached) {
-      print('detached');
       if (kmUser != null && kmUser.userName != "") {
         await FirestoreOperations.activityControl(kmUser, 'offline');
       }

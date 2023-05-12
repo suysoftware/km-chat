@@ -1,13 +1,11 @@
 // ignore_for_file: sort_child_properties_last
 
 import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:in_app_review/in_app_review.dart';
-import 'package:one_km/src/bloc/km_system_settings_cubit.dart';
 import 'package:one_km/src/bloc/km_user_cubit.dart';
 import 'package:one_km/src/constants/style_constants.dart';
 import 'package:one_km/src/dialogs/rules_and_info_dialog.dart';
@@ -175,53 +173,9 @@ class _OptionsDialogState extends State<OptionsDialog> {
 
   cleanChatFunction() async {
     try {
-      // Navigator.pop(context); //DÜZELT
-      //await FirestoreOperations.cleanKmBotChatRequest(widget.kmUser.userUid);  //DÜZELT
-
-      var names = [
-        "Morpheus",
-        "Neo",
-        "Trinity",
-        "Morpheus",
-        "Agent Smith",
-        "Neo",
-        "Agent Smith",
-        "Morpheus",
-        "Trinity",
-        "Agent Smith",
-        "Neo",
-        "Agent Smith",
-        "Neo",
-        "Morpheus",
-        "Trinity",
-        "Neo"
-      ];
-
-      var messages = [
-        "Neo, bu uygulama bize Matrix'in farklı bir yüzünü gösteriyor.",
-        "Yani buradaki herkes Matrix'te 1 km içinde mi?",
-        "Evet, Neo. Ancak unutma ki burası hala Matrix. Her şey bir simülasyon.",
-        "Fakat bu, Matrix'in kontrolünü daha iyi anlamamızı sağlıyor. Bizimle kimlerin etkileşime geçtiğini görme fırsatımız olacak.",
-        "Ne kadar ilginç bir konsept. İnsanların birbirleriyle nasıl iletişim kurduğunu izlemek...",
-        "Smith! Burada ne yapıyorsun?",
-        "Aynı sizin gibi, Neo. Sohbet ediyorum.",
-        "Neo, endişelenme. Smith burada bize zarar veremez.",
-        "Smith, burası senin yerin değil. Seni burada istemiyoruz.",
-        "Özgür irade, Trinity. İlginç bir konsept, değil mi?",
-        "Smith, buradan ayrıl.",
-        "Hmm, anlaşılan hoş karşılanmadım. Başka bir zaman görüşmek üzere.",
-        "İyi. O gittiğine göre, burada ne yapabiliriz?",
-        "Öncelikle, Matrix'in bize sunduğu bu aracı nasıl kullanabileceğimizi anlamamız gerekiyor.",
-        "Evet, ve Matrix'in bizi nasıl etkilediğini gözlemlemeliyiz.",
-        "Anladım. O zaman başlayalım."
-      ];
-
-      for (var i = 0; i < names.length; i++) {
-        await FirestoreOperations.createMatrixChat(context.read<KmUserCubit>().state, context.read<KmSystemSettingsCubit>().state, names[i], messages[i]);
-        await Future.delayed(Duration(milliseconds: 500), () {});
-      }
-    } catch (e) {
-      print(e);
-    }
+      Navigator.pop(context);
+      await FirestoreOperations.cleanKmBotChatRequest(widget.kmUser.userUid);
+      // ignore: empty_catches
+    } catch (e) {}
   }
 }
