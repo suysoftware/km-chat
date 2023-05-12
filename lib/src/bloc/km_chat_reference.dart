@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:one_km/main.dart';
 import 'package:one_km/src/models/km_chat_reference_model.dart';
 import 'package:one_km/src/models/km_system_settings.dart';
 import 'package:one_km/src/models/user_coordinates.dart';

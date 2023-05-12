@@ -1,12 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:one_km/src/bloc/km_chat_reference.dart';
 import 'package:one_km/src/constants/color_constants.dart';
-import 'package:one_km/src/models/km_chat_section.dart';
 import 'package:one_km/src/models/km_system_settings.dart';
 import 'package:one_km/src/models/user_coordinates.dart';
-import 'package:one_km/src/screens/chat/components/chat_target_section.dart';
 import 'package:sizer/sizer.dart';
 
 Widget kmLogoChatBottomTextGetter(String chatDistance, UserCoordinates userCoordinates, String chatSectionEnum, String targetName) {
@@ -56,12 +52,12 @@ Widget kmLogoChatBottomTextGetter(String chatDistance, UserCoordinates userCoord
 }
 
 // ignore: non_constant_identifier_names
-Widget appLogo(double Sizex, KmSystemSettings kmSystemSettings, UserCoordinates userCoordinates, String chatSectionEnum, String targetName) {
+Widget appLogo(double Sizex, KmSystemSettings kmSystemSettings, UserCoordinates userCoordinates, String chatSectionEnum, String targetName,String botGifLink) {
   return chatSectionEnum == "bot"
       ? Padding(
           padding: EdgeInsets.only(top: 4.h),
           child: Image.asset(
-            "assets/images/brain.gif",
+            botGifLink,
             height: 100,
             width: 100,
           ),

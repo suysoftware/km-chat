@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class UserCoordinates {
   UserCoordinates({
     required this.latitude,
@@ -16,6 +18,10 @@ class UserCoordinates {
   String locality;
   String subLocality;
   String postalCode;
+
+   factory UserCoordinates.fromRawJson(String str) => UserCoordinates.fromJson(json.decode(str));
+
+    String toRawJson() => json.encode(toJson());
 
   factory UserCoordinates.fromJson(Map<String, dynamic> json) =>
       UserCoordinates(

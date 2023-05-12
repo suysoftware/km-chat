@@ -1,16 +1,13 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:one_km/main.dart';
 import 'package:one_km/src/constants/color_constants.dart';
 import 'package:one_km/src/utils/basic_getters.dart';
 import 'package:sizer/sizer.dart';
 import 'package:swipeable_tile/swipeable_tile.dart';
-
 import 'package:one_km/src/models/km_chat_message.dart';
 import 'package:one_km/src/models/km_user.dart';
-
 import '../../../bloc/km_chat_reference.dart';
 import '../../../models/km_chat_reference_model.dart';
 import '../../../models/km_chat_section.dart';
@@ -33,9 +30,9 @@ class ChatItem extends StatelessWidget {
       return kmChatMessage.senderUser.userAvatar == "ai_image_answer"
           ? KmChatArtItem(imageLink: kmChatMessage.userMessage)
           : SwipeableTile.swipeToTriggerCard(
-              color: Colors.transparent,
+              color: ColorConstants.transparentColor,
               shadow: BoxShadow(
-                color: Colors.black.withOpacity(0.35),
+                color: CupertinoColors.black.withOpacity(0.35),
                 // blurRadius: 4,
                 offset: const Offset(2, 2),
               ),
@@ -46,7 +43,6 @@ class ChatItem extends StatelessWidget {
               onSwiped: (direction) async {
                 if (kmChatMessage.senderUser.userUid != kmUser.userUid) {
                   if (refBloc.chatSectionEnum.name == ChatSectionEnum.club.name || refBloc.chatSectionEnum.name == ChatSectionEnum.public.name) {
-               
                     context.read<KmChatReferenceCubit>().goPrivate(kmUser.userUid, kmChatMessage.senderUser.userUid, kmChatMessage.senderUser.userName);
                     replyOperation(kmChatMessage, kmUser);
                     await prefsHelper.removeUnreadUser(kmChatMessage.senderUser.userUid);
@@ -63,7 +59,7 @@ class ChatItem extends StatelessWidget {
                       return AnimatedContainer(
                         onEnd: () {},
                         duration: const Duration(milliseconds: 400),
-                        color: progress.isDismissed ? Colors.transparent : (progress.value > 0.5 ? ColorConstants.juniorColor : ColorConstants.systemColor),
+                        color: progress.isDismissed ? ColorConstants.transparentColor : (progress.value > 0.5 ? ColorConstants.juniorColor : ColorConstants.systemColor),
                       );
                     },
                   );

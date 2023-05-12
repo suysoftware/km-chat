@@ -11,23 +11,23 @@ class KmChatArtItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
           Padding(
             padding: EdgeInsets.fromLTRB(5.w, 1.h, 5.w, 1.h),
             child: Text(
               "KM-ART: ",
-              style: StyleConstants.privateMessageTextStyle,
+              style: StyleConstants.botMessageTextStyle,
             ),
           ),
-          Spacer(
+          const Spacer(
             flex: 1,
           ),
           Container(
               height: 150,
               width: 150,
-              decoration: BoxDecoration(border: Border.all(color: ColorConstants.privateMessageColor)),
+              decoration: BoxDecoration(border: Border.all(color: ColorConstants.systemColor)),
               child: CachedNetworkImage(
                 fit: BoxFit.cover,
                 imageUrl: imageLink,
@@ -39,14 +39,19 @@ class KmChatArtItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                placeholder: (context, url) => CupertinoActivityIndicator(),
-                errorWidget: (context, url, error) => Icon(CupertinoIcons.xmark),
+                placeholder: (context, url) => const CupertinoActivityIndicator(),
+                errorWidget: (context, url, error) => const Icon(CupertinoIcons.xmark),
               )),
-          Spacer(
+          const Spacer(
             flex: 2,
           ),
-          CupertinoButton(child: Icon(CupertinoIcons.cloud_download), onPressed: () {}),
-          Spacer(
+          CupertinoButton(
+              child: const Icon(
+                CupertinoIcons.cloud_download,
+                color: ColorConstants.systemColor,
+              ),
+              onPressed: () {}),
+          const Spacer(
             flex: 1,
           )
         ],

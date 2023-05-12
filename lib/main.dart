@@ -9,13 +9,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:one_km/src/bloc/km_chat_reference.dart';
 import 'package:one_km/src/bloc/km_system_settings_cubit.dart';
 import 'package:one_km/src/bloc/km_user_cubit.dart';
 import 'package:one_km/src/screens/login_screen.dart';
 import 'package:one_km/src/services/firestore_operations.dart';
-import 'package:one_km/src/utils/SharedPreferencesHelper.dart';
+import 'package:one_km/src/utils/shared_preferences_helper.dart';
 import 'package:sizer/sizer.dart';
 import 'src/constants/color_constants.dart';
 import 'src/screens/chat/chat_screen.dart';
@@ -39,11 +38,13 @@ Future<void> appTracking() async {
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // If you're going to use other Firebase services in the background, such as Firestore,
-  // make sure you call `initializeApp` before using other Firebase services.
-  //mesaj kategori ve tiplerini ayarla
-  // ignore: avoid_print
-  print("aha bildirim");
+  if (message.notification != null) {
+    print("faf");
+    print(message.notification!.body);
+    print(message.notification!.title);
+  }
+  print("s");
+
   print('Handling a background message ${message.messageId}');
 
   await Firebase.initializeApp();
@@ -101,12 +102,26 @@ class __cupertinoAppState extends State<_cupertinoApp> with WidgetsBindingObserv
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   Future<void> _firebaseMessagingOnMessageHandler(RemoteMessage message) async {
+    print("aaa");
     RemoteNotification? notification = message.notification;
     messaging.setForegroundNotificationPresentationOptions(alert: false, badge: false, sound: false);
 //uygulamada iken
   }
 
   Future<void> _firebaseMessagingOpenedAppHandler(RemoteMessage message) async {
+  
+    if (message.data["notiCategoryDetail"] == "private_message") {
+      var senderUid = message.data["senderUserUid"];
+      var senderName = message.data["senderUserName"];
+
+      context.read<KmChatReferenceCubit>().goPrivate(context.read<KmUserCubit>().state.userUid, senderUid, senderName);
+      prefsHelper.removeUnreadUser(senderUid);
+    }
+    else if (message.data["notiCategoryDetail"] == "public_message"){
+
+      context.read<KmChatReferenceCubit>().goPublic(context.read<KmUserCubit>().state.userCoordinates,context.read<KmSystemSettingsCubit>().state);
+    }
+
 //mesaj açıldığında
   }
 
@@ -139,6 +154,7 @@ class __cupertinoAppState extends State<_cupertinoApp> with WidgetsBindingObserv
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.inactive) {
+      print("inactive");
       //print('inactive');
       if (kmUser != null && kmUser.userName != "") {
         await FirestoreOperations.activityControl(kmUser, 'offline');
@@ -152,18 +168,20 @@ class __cupertinoAppState extends State<_cupertinoApp> with WidgetsBindingObserv
     }
 
     if (state == AppLifecycleState.paused) {
+      print("paused");
       //print(" altta atıldı");
-      if (kmUser != null && kmUser.userName != "") {
-        await FirestoreOperations.activityControl(kmUser, 'offline');
-      }
       messaging.setForegroundNotificationPresentationOptions(
         alert: true,
         badge: true,
         sound: true,
       );
+      if (kmUser != null && kmUser.userName != "") {
+        await FirestoreOperations.activityControl(kmUser, 'offline');
+      }
     }
 
     if (state == AppLifecycleState.resumed) {
+      print("resumed");
       messaging.setForegroundNotificationPresentationOptions(
         alert: false,
         badge: false,
@@ -177,7 +195,7 @@ class __cupertinoAppState extends State<_cupertinoApp> with WidgetsBindingObserv
     }
 
     if (state == AppLifecycleState.detached) {
-      //print('detached');
+      print('detached');
       if (kmUser != null && kmUser.userName != "") {
         await FirestoreOperations.activityControl(kmUser, 'offline');
       }

@@ -23,7 +23,6 @@ class _NotificationDialogState extends State<NotificationDialog> {
     super.initState();
     publicSwitchValue = context.read<KmUserCubit>().state.userNotificationSettings.publicMessage;
     privateSwitchValue = context.read<KmUserCubit>().state.userNotificationSettings.privateMessage;
- ;
   }
 
   @override
@@ -57,7 +56,6 @@ class _NotificationDialogState extends State<NotificationDialog> {
                 height: 2.h,
               ),
               notificationSwitch(privateSwitchValue, "Private"),
-           
             ],
           ),
         ));
@@ -83,14 +81,14 @@ class _NotificationDialogState extends State<NotificationDialog> {
               setState(() {
                 privateSwitchValue = value;
               });
-            } 
-            
+            }
+
             FirestoreOperations.kmUserNotificationSettingUpdate(context.read<KmUserCubit>().state, notificationType, value).then((requestResult) {
               if (notificationType == "Public") {
                 context.read<KmUserCubit>().notificationSettingPublicChange(value);
               } else if (notificationType == "Private") {
                 context.read<KmUserCubit>().notificationSettingPrivateChange(value);
-              } 
+              }
             });
           },
           activeColor: ColorConstants.designGreen,

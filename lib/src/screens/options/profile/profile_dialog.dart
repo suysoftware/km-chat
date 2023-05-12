@@ -31,12 +31,11 @@ class _ProfileDialogState extends State<ProfileDialog> {
     return CupertinoPageScaffold(
       backgroundColor: Colors.transparent.withOpacity(0.93),
       child: Padding(
-        padding: EdgeInsets.all(10.sp),
-        child:
-            BlocBuilder<KmUserCubit, KmUser>(builder: (context, snapshotBloc) {
+        padding: EdgeInsets.all(100.h < 1000 ? 5.sp : 10.sp),
+        child: BlocBuilder<KmUserCubit, KmUser>(builder: (context, snapshotBloc) {
           return Column(children: [
             SizedBox(
-              height: 6.h,
+              height: 100.h < 1000 ? 5.h : 0.h,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -48,19 +47,19 @@ class _ProfileDialogState extends State<ProfileDialog> {
               ],
             ),
             SizedBox(
-              height: 100.h > 1000 ? 0.h : 4.h,
+              height: 100.h < 1000 ? 0.h : 3.h,
             ),
             kmAvatarBuild(context, snapshotBloc.userAvatar),
             SizedBox(
-              height: 1.h,
+              height: 100.h < 1000 ? 0.h : 1.h,
             ),
             kmNameTextBuild(context, snapshotBloc.userName),
             SizedBox(
-              height: 0.5.h,
+              height: 100.h < 1000 ? 0.h : 0.5.h,
             ),
             kmLevelTextBuild(context, snapshotBloc.userLevel.toString()),
             SizedBox(
-              height: 0.5.h,
+              height: 100.h < 1000 ? 0.h : 0.5.h,
             ),
             kmTitleTextBuild(context, snapshotBloc.userTitle),
             experiencePointBuild(context),
@@ -88,9 +87,7 @@ class _ProfileDialogState extends State<ProfileDialog> {
         child: CircleAvatar(
             backgroundColor: ColorConstants.themeColor,
             radius: 60.sp,
-            child: Image.network(widget.kmChatMessage != null
-                ? widget.kmChatMessage!.senderUser .userAvatar
-                : avatarLink)),
+            child: Image.network(widget.kmChatMessage != null ? widget.kmChatMessage!.senderUser.userAvatar : avatarLink)),
       ),
     );
   }
@@ -99,7 +96,7 @@ class _ProfileDialogState extends State<ProfileDialog> {
     return Align(
       alignment: Alignment.center,
       child: Text(
-        '/${widget.kmChatMessage != null ? widget.kmChatMessage!.senderUser .userName : userName}',
+        '/${widget.kmChatMessage != null ? widget.kmChatMessage!.senderUser.userName : userName}',
         style: StyleConstants.profileNameTextStyle,
       ),
     );
@@ -108,7 +105,7 @@ class _ProfileDialogState extends State<ProfileDialog> {
   Widget kmSpamButtonBuild(BuildContext context) {
     return widget.kmChatMessage != null
         ? Padding(
-            padding: EdgeInsets.only(top: 10.h),
+            padding: EdgeInsets.only(top: 100.h < 1000 ? 0.h : 10.h),
             child: Align(
               alignment: Alignment.bottomCenter,
               child: CupertinoButton(
@@ -116,8 +113,7 @@ class _ProfileDialogState extends State<ProfileDialog> {
                       height: 5.h,
                       width: 70.w,
                       decoration: BoxDecoration(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(8.0)),
+                          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
                           border: Border.all(
                             color: ColorConstants.juniorColor,
                             width: 4.0,
@@ -128,8 +124,7 @@ class _ProfileDialogState extends State<ProfileDialog> {
                         style: StyleConstants.profileTitlePlebTextStyle,
                       ))),
                   onPressed: () {
-                    AlertDialogs.spamDialog(context.read<KmUserCubit>().state,
-                        widget.kmChatMessage!, context);
+                    AlertDialogs.spamDialog(context.read<KmUserCubit>().state, widget.kmChatMessage!, context);
                   }),
             ),
           )
@@ -174,19 +169,15 @@ class _ProfileDialogState extends State<ProfileDialog> {
                               height: 5.h,
                               width: 60.w,
                               decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(8.0)),
+                                  borderRadius: const BorderRadius.all(Radius.circular(8.0)),
                                   border: Border.all(
                                     color: ColorConstants.juniorColor,
                                     width: 1.0,
                                   )),
                               child: Center(
                                   child: Text(
-                                secretPasswordVisibility
-                                    ? secretPassword
-                                    : "***************",
-                                style: StyleConstants
-                                    .profileSecretPasswordTextStyle,
+                                secretPasswordVisibility ? secretPassword : "***************",
+                                style: StyleConstants.profileSecretPasswordTextStyle,
                               ))),
                           CupertinoButton(
                               child: secretPasswordVisibility
@@ -200,8 +191,7 @@ class _ProfileDialogState extends State<ProfileDialog> {
                                     ),
                               onPressed: () {
                                 setState(() {
-                                  secretPasswordVisibility =
-                                      !secretPasswordVisibility;
+                                  secretPasswordVisibility = !secretPasswordVisibility;
                                 });
                               }),
                         ],
@@ -216,8 +206,7 @@ class _ProfileDialogState extends State<ProfileDialog> {
                     ],
                   ),
                   onPressed: () {
-                    FlutterClipboard.copy(secretPassword)
-                        .then((value) => print('copied'));
+                    FlutterClipboard.copy(secretPassword).then((value) => print('copied'));
                   }),
             ),
           )
@@ -225,19 +214,13 @@ class _ProfileDialogState extends State<ProfileDialog> {
   }
 
   Widget kmTitleTextBuild(BuildContext context, String newUserTitle) {
-    return Text(
-        (widget.kmChatMessage != null
-            ? widget.kmChatMessage!.senderUser .userTitle
-            : newUserTitle),
-        style: BasicGetters.profileTitleTextStyleGetter(
-            widget.kmChatMessage != null
-                ? widget.kmChatMessage!.senderUser .userTitle
-                : newUserTitle));
+    return Text((widget.kmChatMessage != null ? widget.kmChatMessage!.senderUser.userTitle : newUserTitle),
+        style: BasicGetters.profileTitleTextStyleGetter(widget.kmChatMessage != null ? widget.kmChatMessage!.senderUser.userTitle : newUserTitle));
   }
 
   Widget kmLevelTextBuild(BuildContext context, String userLevel) {
     return Text(
-      'lv.${widget.kmChatMessage != null ? widget.kmChatMessage!.senderUser .userLevel.toString() : userLevel}',
+      'lv.${widget.kmChatMessage != null ? widget.kmChatMessage!.senderUser.userLevel.toString() : userLevel}',
       style: StyleConstants.profileLevelTextStyle,
     );
   }

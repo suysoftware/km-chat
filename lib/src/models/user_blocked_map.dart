@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserBlockedMap {
@@ -12,7 +14,9 @@ class UserBlockedMap {
     required this.userUid,
     required this.targetMessage,
   });
+   factory UserBlockedMap.fromRawJson(String str) => UserBlockedMap.fromJson(json.decode(str));
 
+    String toRawJson() => json.encode(toJson());
   factory UserBlockedMap.fromJson(Map<String, dynamic> json) => UserBlockedMap(
         userName: json["user_name"],
         blockedDate: json["blocked_date"],

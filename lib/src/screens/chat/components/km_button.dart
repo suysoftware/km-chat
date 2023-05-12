@@ -6,12 +6,14 @@ import 'package:one_km/src/bloc/km_user_cubit.dart';
 import 'package:one_km/src/screens/options/options_dialog.dart';
 import 'package:one_km/src/widgets/app_logo.dart';
 import 'package:sizer/sizer.dart';
-
 import '../../../models/km_chat_reference_model.dart';
-import '../../../models/km_chat_section.dart';
 
 class KmButton extends StatelessWidget {
-  const KmButton({super.key});
+  final String botGifLink;
+  const KmButton({
+    super.key,
+    required this.botGifLink,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,7 @@ class KmButton extends StatelessWidget {
                 child: Padding(
                   padding: EdgeInsets.only(top: refBloc.chatSectionEnum.name == "bot" ? 0.h : 4.h),
                   child: appLogo(
-                      1, context.read<KmSystemSettingsCubit>().state, context.read<KmUserCubit>().state.userCoordinates, refBloc.chatSectionEnum.name, refBloc.chatTargetName),
+                      1, context.read<KmSystemSettingsCubit>().state, context.read<KmUserCubit>().state.userCoordinates, refBloc.chatSectionEnum.name, refBloc.chatTargetName,botGifLink),
                 ),
               ),
             )),

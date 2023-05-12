@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_km/main.dart';
@@ -10,9 +9,7 @@ import 'package:one_km/src/bloc/km_user_cubit.dart';
 import 'package:one_km/src/constants/color_constants.dart';
 import 'package:one_km/src/dialogs/alert_dialogs.dart';
 import 'package:one_km/src/models/km_chat_section.dart';
-import 'package:one_km/src/models/user_coordinates.dart';
 import 'package:sizer/sizer.dart';
-
 import '../../../models/km_chat_message.dart';
 import '../../../models/km_chat_reference_model.dart';
 import '../../../models/km_user.dart';
@@ -97,24 +94,19 @@ class ChatTargetSection extends StatelessWidget {
                 var borderColor = ColorConstants.designGreen;
 
                 if (unreadList.data != null) {
-         
                   var unreadListData = unreadList.data;
 
                   if (unreadListData != null) {
-                
-         
                     if (unreadListData.contains(kmSectionList[indeks].targetUid)) {
                       borderColor = ColorConstants.masterColor;
                     } else {
                       borderColor = ColorConstants.designGreen;
                     }
                   }
-                } else {
-      
-                }
+                } else {}
 
                 return GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     switch (kmSectionList[indeks].chatSectionEnum) {
                       case ChatSectionEnum.public:
                         context.read<KmChatReferenceCubit>().goPublic(kmUser.userCoordinates, context.read<KmSystemSettingsCubit>().state);
@@ -122,9 +114,8 @@ class ChatTargetSection extends StatelessWidget {
                       case ChatSectionEnum.private:
                         if (kmSectionList[indeks].targetUid != refBloc.chatTargetNo) {
                           context.read<KmChatReferenceCubit>().goPrivate(kmUser.userUid, kmSectionList[indeks].targetUid, kmSectionList[indeks].targetName);
-                          prefsHelper.removeUnreadUser(kmSectionList[indeks].targetUid);
+                          await prefsHelper.removeUnreadUser(kmSectionList[indeks].targetUid);
                         } else {
-                     
                           AlertDialogs.clearChatDialog(kmUser, refBloc.chatTargetNo, context, context.read<KmSystemSettingsCubit>().state);
                         }
                         break;
@@ -140,7 +131,7 @@ class ChatTargetSection extends StatelessWidget {
                   child: Container(
                     height: 50,
                     width: 220,
-                    padding: EdgeInsets.all(5),
+                    padding:const EdgeInsets.all(5),
                     decoration: BoxDecoration(
                         color: sectionColorGetter(refBloc.chatSectionEnum.name, kmSectionList[indeks].chatSectionEnum.name, refBloc.chatTargetNo, kmSectionList[indeks].targetUid),
                         border: Border.all(color: borderColor, width: 2)),
@@ -154,13 +145,13 @@ class ChatTargetSection extends StatelessWidget {
                           height: 18,
                           color: ColorConstants.designGreen,
                         ),
-                        SizedBox(width: 8),
+                      const  SizedBox(width: 8),
                         Text(kmSectionList[indeks].targetName.length >= 11 ? kmSectionList[indeks].targetName.substring(0, 10) : kmSectionList[indeks].targetName,
-                            style: TextStyle(color: ColorConstants.juniorColor, fontSize: 17)),
-                        SizedBox(width: 2),
+                            style: const TextStyle(color: ColorConstants.juniorColor, fontSize: 17)),
+                       const SizedBox(width: 2),
                         kmSectionList[indeks].chatSectionEnum.name == "public" || kmSectionList[indeks].chatSectionEnum.name == "bot"
-                            ? SizedBox()
-                            : Icon(CupertinoIcons.xmark, color: ColorConstants.juniorColor, size: 15),
+                            ? const SizedBox()
+                            : const Icon(CupertinoIcons.xmark, color: ColorConstants.juniorColor, size: 15),
                       ],
                     )),
                   ),

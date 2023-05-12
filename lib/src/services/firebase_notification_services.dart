@@ -5,7 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
-
+/*
 class FirebaseNotificationService {
   late final FirebaseMessaging messaging;
   // ignore: prefer_const_constructors
@@ -14,21 +14,18 @@ class FirebaseNotificationService {
     'High Importance Notifications',
   );
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   Future<void> initNotification() async {
     // ignore: prefer_const_declarations
-    final AndroidInitializationSettings initializationSettingsAndroid =
-        const AndroidInitializationSettings('@mipmap/ic_launcher');
-    final InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+    final AndroidInitializationSettings initializationSettingsAndroid = const AndroidInitializationSettings('@mipmap/ic_launcher');
+    final InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  Future<void> showNotification(
-      int id, String title, String body, int seconds) async {
+  Future<void> showNotification(int id, String title, String body, int seconds) async {
+    print("show not");
     await flutterLocalNotificationsPlugin.zonedSchedule(
         id,
         title,
@@ -42,8 +39,7 @@ class FirebaseNotificationService {
           importance: Importance.max,
           priority: Priority.max,
         )),
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
         androidAllowWhileIdle: true);
   }
 
@@ -54,13 +50,13 @@ class FirebaseNotificationService {
   void connectNotification() async {
     await Firebase.initializeApp();
     messaging = FirebaseMessaging.instance;
-    messaging.setForegroundNotificationPresentationOptions(
-        alert: true, sound: true, badge: true);
+    messaging.setForegroundNotificationPresentationOptions(alert: true, sound: true, badge: true);
 
     settingNotification();
     FirebaseMessaging.onMessage.listen((RemoteMessage event) {
-      showNotification(
-          1, '${event.notification!.title}', '${event.notification!.body}', 3);
+      print("bura");
+      showNotification(1, '${event.notification!.title}', '${event.notification!.body}', 3);
     });
   }
 }
+*/

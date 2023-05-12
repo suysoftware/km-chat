@@ -5,9 +5,6 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:one_km/main.dart';
@@ -17,21 +14,15 @@ import 'package:one_km/src/bloc/km_user_cubit.dart';
 import 'package:one_km/src/constants/color_constants.dart';
 import 'package:one_km/src/models/km_chat_message.dart';
 import 'package:one_km/src/models/km_chat_reference_model.dart';
-import 'package:one_km/src/models/km_chat_section.dart';
 import 'package:one_km/src/models/km_user.dart';
 import 'package:one_km/src/screens/chat/components/chat_item.dart';
 import 'package:one_km/src/screens/chat/components/chat_target_section.dart';
 import 'package:one_km/src/screens/chat/components/chat_text_field.dart';
 import 'package:one_km/src/screens/chat/components/km_button.dart';
-import 'package:one_km/src/screens/chat/components/white_rabbit_button.dart';
-import 'package:one_km/src/screens/options/options_dialog.dart';
 import 'package:one_km/src/services/firestore_operations.dart';
 import 'package:one_km/src/utils/basic_getters.dart';
-import 'package:one_km/src/widgets/app_logo.dart';
 import 'package:one_km/src/widgets/mini_widget.dart';
 import 'package:sizer/sizer.dart';
-import 'package:swipeable_tile/swipeable_tile.dart';
-import 'package:upgrader/upgrader.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -49,8 +40,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   bool publicNotification = false;
   var chatRef;
   var messageController = TextEditingController();
-  late AnimationController topIconAnimationController;
-  late Animation<double> topIconRotateAnimationValue;
+
+
+  var botGifLink = "assets/images/answer_paused.png";  
 
   late AnimationController botSectionArrowAnimationController;
   late Animation<double> botSectionArrowRotateAnimationValue;
@@ -103,22 +95,28 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         await FirestoreOperations.sendMessageToPublic(textFieldData, context.read<KmUserCubit>().state, publicNotification, context.read<KmSystemSettingsCubit>().state);
         break;
       case "private":
-        print(recieverUser.userUid + " RECIEVER");
         await FirestoreOperations.sendMessageToPrivate(textFieldData, context.read<KmUserCubit>().state, recieverUser);
         break;
       case "club":
         break;
       case "bot":
         //animation start
-        topIconAnimationController.forward();
-        botSectionArrowAnimationController.forward();
+    
+        setState(() {
+            botGifLink="assets/images/answer_waiting.gif";
+        });
+      
+     
         if (isChat) {
           await FirestoreOperations.sendMessageToBot(textFieldData, context.read<KmUserCubit>().state, kmChatMessages);
         } else {
           await FirestoreOperations.sendMessageToArtBot(textFieldData, context.read<KmUserCubit>().state);
         }
-        topIconAnimationController.stop();
-        topIconAnimationController.reset();
+        setState(() {
+                 botGifLink = "assets/images/answer_paused.png";  
+        });
+ 
+   
 
         // animation stop
         break;
@@ -197,12 +195,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
     initConnectivity();
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
-    topIconAnimationController = AnimationController(duration: const Duration(milliseconds: 3000), vsync: this);
+
     botSectionArrowAnimationController = AnimationController(duration: const Duration(milliseconds: 200), vsync: this);
-    topIconRotateAnimationValue = Tween(begin: 0.0, end: 3.4 * 2.0).animate(topIconAnimationController)
-      ..addListener(() {
-        setState(() {});
-      });
+
     botSectionArrowRotateAnimationValue = Tween(begin: 0.0, end: pi * 1).animate(botSectionArrowAnimationController)
       ..addListener(() {
         setState(() {});
@@ -226,8 +221,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
 //
 
-  
-
     FirebaseFirestore.instance
         .collection('private_chat')
         .doc(context.read<KmUserCubit>().state.userUid)
@@ -240,8 +233,17 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         switch (change.type) {
           case DocumentChangeType.added:
             if (change.doc.data()!.senderUser.userUid != context.read<KmUserCubit>().state.userUid) {
-              HapticFeedback.vibrate();
-              prefsHelper.addNewUnreadUser(change.doc.data()!.senderUser.userUid);
+              if (change.doc.data()!.userMessageTime.millisecondsSinceEpoch > DateTime.now().millisecondsSinceEpoch - 10000) {
+                if (recieverUser != null) {
+                  if (recieverUser.userUid != change.doc.data()!.senderUser.userUid) {
+                    HapticFeedback.vibrate();
+                    prefsHelper.addNewUnreadUser(change.doc.data()!.senderUser.userUid);
+                  }
+                } else {
+                  HapticFeedback.vibrate();
+                  prefsHelper.addNewUnreadUser(change.doc.data()!.senderUser.userUid);
+                }
+              }
             }
             break;
           case DocumentChangeType.modified:
@@ -257,7 +259,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    topIconAnimationController.dispose();
+
     botSectionArrowAnimationController.dispose();
     super.dispose();
   }
@@ -272,10 +274,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Transform.rotate(
-                      angle: topIconRotateAnimationValue.value,
-                      child: KmButton(),
-                    ),
+                    KmButton(botGifLink: botGifLink,),
                     SizedBox(
                       height: 1.h,
                     ),
@@ -336,19 +335,14 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   Widget chatStreamBuilder(KmUser kmUser) {
     return Flexible(child: BlocBuilder<KmChatReferenceCubit, KmChatReferenceModel>(builder: (context, refBloc) {
       return StreamBuilder<QuerySnapshot<KmChatMessage>>(
-          //stream: chatRef.orderBy('user_message_time', descending: false).limitToLast(context.read<KmSystemSettingsCubit>().state.messagesAmount).snapshots(),
-
           stream: refBloc.chatReference,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               if (!snapshot.hasData) {
                 return MiniWidgets.circularProgress();
               }
-
               var dataCome = snapshot.requireData;
-
               var convertedData = BasicGetters.chatMessageQuerySnapshotToList(dataCome);
-              print(refBloc.chatTargetNo);
 
               return BlocBuilder<KmUserCubit, KmUser>(builder: (context, snapshotBloc) {
                 return FutureBuilder(
@@ -356,12 +350,16 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                     builder: (context, snap) {
                       if (snap.hasData) {
                         var snapData = snap.data!;
-
-                        if (snapData.any((element) => element.senderUser.userTitle != "system")) {
-                          publicNotification = DateTime.now().millisecondsSinceEpoch -
-                                  snapData.firstWhere((element) => element.senderUser.userTitle != 'system').userMessageTime.millisecondsSinceEpoch >
-                              1800000;
+                        if (snapData.any((element) => element.senderUser.userTitle != "system") == true) {
+                          if (snapData.any((element) => element.senderUser.userTitle != "system")) {
+                            publicNotification = DateTime.now().millisecondsSinceEpoch -
+                                    snapData.firstWhere((element) => element.senderUser.userTitle != 'system').userMessageTime.millisecondsSinceEpoch >
+                                600000;
+                          }
+                        } else {
+                          publicNotification = true;
                         }
+
                         if (snapData.isNotEmpty) {
                           if (refBloc.chatSectionEnum.name == "private") {
                             var targetUserData;
@@ -385,10 +383,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                                     return snapData.isNotEmpty ? ChatItem(kmChatMessage: snapData[indeks], kmUser: kmUser, replyOperation: _replyOperation) : const SizedBox();
                                   }),
                             ),
-                            refBloc.chatSectionEnum.name == "bot" ? botChatTypeSelectArea() : SizedBox(),
-                            refBloc.chatSectionEnum.name == "bot" ? botChatTypeArrowButton() : SizedBox(),
-                            ChatTargetSection(),
-                            SizedBox(
+                            refBloc.chatSectionEnum.name == "bot" ? botChatTypeSelectArea() : const SizedBox(),
+                            refBloc.chatSectionEnum.name == "bot" ? botChatTypeArrowButton() : const SizedBox(),
+                            const ChatTargetSection(),
+                            const SizedBox(
                               height: 10,
                             ),
                             ChatTextField(
@@ -398,6 +396,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                               messageController: messageController,
                               privateTargetName: privateMessageTargetName != "" ? "$privateMessageTargetName   " : privateMessageTargetName,
                               kmChatMessage: snapData,
+                              isChat: isChat,
                             )
                           ],
                         );
@@ -429,20 +428,19 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                         setState(() {
                           botSectionArrowAnimationController.forward();
                           isChat = true;
-                          print("chat");
                         });
                       },
                       child: Container(
                         width: botSectionChatTypeSelectContainerWidthAnimationValue.value,
                         height: 40,
-                        child: Center(child: Text("Chat")),
                         decoration: BoxDecoration(
                           color: botSectionColorGetter(true),
-                          border: Border(
+                          border: const Border(
                               bottom: BorderSide(color: ColorConstants.designGreen, width: 2),
                               left: BorderSide(color: ColorConstants.designGreen, width: 2),
                               top: BorderSide(color: ColorConstants.designGreen, width: 2)),
                         ),
+                        child: const Center(child: Text("Chat")),
                       ),
                     ),
                     GestureDetector(
@@ -450,28 +448,27 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                         setState(() {
                           botSectionArrowAnimationController.forward();
                           isChat = false;
-                          print("art");
                           //seceneği kapat
                         });
                       },
                       child: Container(
                         width: botSectionChatTypeSelectContainerWidthAnimationValue.value,
                         height: 40,
-                        child: Center(child: Text("Art")),
                         decoration: BoxDecoration(
                           color: botSectionColorGetter(false),
-                          border: Border(
+                          border: const Border(
                               bottom: BorderSide(color: ColorConstants.designGreen, width: 2),
                               right: BorderSide(color: ColorConstants.designGreen, width: 2),
                               top: BorderSide(color: ColorConstants.designGreen, width: 2)),
                         ),
+                        child: const Center(child: Text("Art")),
                       ),
                     ),
                   ],
                 ),
               ),
             ))
-        : SizedBox();
+        : const SizedBox();
   }
 
   botChatTypeArrowButton() {
@@ -486,7 +483,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               botSectionArrowAnimationController.forward();
             }
           },
-          child: Icon(CupertinoIcons.chevron_down),
+          child: const Icon(
+            CupertinoIcons.chevron_down,
+            color: ColorConstants.systemColor,
+          ),
         ));
   }
 }

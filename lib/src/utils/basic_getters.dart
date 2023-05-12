@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -8,7 +10,6 @@ import 'package:one_km/src/models/km_chat_section.dart';
 import 'package:one_km/src/models/km_system_settings.dart';
 import 'package:one_km/src/models/km_user.dart';
 import 'package:one_km/src/models/user_coordinates.dart';
-import 'package:one_km/src/widgets/app_logo.dart';
 import 'package:vibration/vibration.dart';
 
 import '../screens/options/profile/profile_dialog.dart';
@@ -108,7 +109,7 @@ class BasicGetters {
       case "pleb":
         return StyleConstants.plebTextStyle;
       case "bot":
-        return StyleConstants.privateMessageTextStyle;
+        return StyleConstants.botMessageTextStyle;
       default:
         return StyleConstants.plebTextStyle;
     }
@@ -127,7 +128,7 @@ class BasicGetters {
       case "pleb":
         return StyleConstants.plebNameTextStyle;
       case "bot":
-        return StyleConstants.privateMessageTextStyle;
+        return StyleConstants.botMessageTextStyle;
       default:
         return StyleConstants.plebNameTextStyle;
     }
@@ -148,7 +149,7 @@ class BasicGetters {
     }
   }
 
-  static Future<List<KmChatMessage>> chatFilteredMessagesGetter(List<KmChatMessage> kmChatList, KmUser myUserModel,String privateRefNo,bool isPrivate) async {
+  static Future<List<KmChatMessage>> chatFilteredMessagesGetter(List<KmChatMessage> kmChatList, KmUser myUserModel, String privateRefNo, bool isPrivate) async {
     var kmChatFilteredList = <KmChatMessage>[];
     var dateTime = DateTime.now().millisecondsSinceEpoch;
 
@@ -168,26 +169,22 @@ class BasicGetters {
           Vibration.vibrate(duration: 40);
         }*/
 
-       if(isPrivate){
-        if(privateRefNo==chatMessage.senderUser.userUid&&chatMessage.senderUser.userTitle!="system"){
-          kmChatFilteredList.add(chatMessage);
-        }
-        else if(chatMessage.senderUser.userUid==myUserModel.userUid&&chatMessage.recieverUser.userUid==privateRefNo&&chatMessage.recieverUser.userTitle!="system"){
-          kmChatFilteredList.add(chatMessage);
-
-        }
-
-       }
-       else{
-         if (chatMessage.senderUser.userTitle == "system" && dateTime - chatMessage.userMessageTime.millisecondsSinceEpoch > 30000) {
-          // ignore: prefer_is_empty
-          if (kmChatFilteredList.length < 1) {
+        if (isPrivate) {
+          if (privateRefNo == chatMessage.senderUser.userUid && chatMessage.senderUser.userTitle != "system") {
+            kmChatFilteredList.add(chatMessage);
+          } else if (chatMessage.senderUser.userUid == myUserModel.userUid && chatMessage.recieverUser.userUid == privateRefNo && chatMessage.recieverUser.userTitle != "system") {
             kmChatFilteredList.add(chatMessage);
           }
         } else {
-          kmChatFilteredList.add(chatMessage);
+          if (chatMessage.senderUser.userTitle == "system" && dateTime - chatMessage.userMessageTime.millisecondsSinceEpoch > 30000) {
+            // ignore: prefer_is_empty
+            if (kmChatFilteredList.length < 1) {
+              kmChatFilteredList.add(chatMessage);
+            }
+          } else {
+            kmChatFilteredList.add(chatMessage);
+          }
         }
-       }
       }
     }
 
@@ -256,7 +253,6 @@ class BasicGetters {
         targetAvatar: ""));
     for (var chatMessage in kmChatList) {
       if (myUserModel.userBlockedMap.keys.contains(chatMessage.senderUser.userUid) || myUserModel.userBlockedMap.keys.contains(chatMessage.recieverUser.userUid)) {
-        print("banli user");
       } else {
         if (chatMessage.senderUser.userUid != myUserModel.userUid && dateTime - chatMessage.userMessageTime.millisecondsSinceEpoch < 2000) {
           Vibration.vibrate(duration: 40);
@@ -268,7 +264,7 @@ class BasicGetters {
           //  kmChatFilteredList.add(chatMessage.data());
           //}
         } else {
-          if (chatMessage.senderUser.userTitle != "system"&&chatMessage.senderUser.userAvatar != "public") {
+          if (chatMessage.senderUser.userTitle != "system" && chatMessage.senderUser.userAvatar != "public") {
             var targetUserUid;
             var firstModel;
             if (chatMessage.senderUser.userUid == myUserModel.userUid) {

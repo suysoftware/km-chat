@@ -50,7 +50,9 @@ class KmUser {
     this.userNotificationSettings,
     
   );
+  factory KmUser.fromRawJson(String str) => KmUser.fromJson(json.decode(str));
 
+    String toRawJson() => json.encode(toJson());
   factory KmUser.fromJson(Map<String, dynamic> json) => KmUser.withInfo(
         UserCoordinates.fromJson(json["user_coordinates"]),
         json["user_name"],

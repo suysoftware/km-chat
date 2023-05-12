@@ -28,7 +28,7 @@ class _AccountReviveDialogState extends State<AccountReviveDialog> {
           child: Column(
             children: [
               SizedBox(
-                height: 10.h,
+                height: 100.h < 1000 ? 10.h : 15.h,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -40,11 +40,11 @@ class _AccountReviveDialogState extends State<AccountReviveDialog> {
                 ],
               ),
               SizedBox(
-                height: 20.h,
+                height: 100.h < 1000 ? 10.h : 20.h,
               ),
               const Text('Fill account secret password!'),
               SizedBox(
-                height: 2.h,
+                height: 100.h > 1000 ? 0.h : 2.h,
               ),
               secretPasswordTextFieldBuild(),
               SizedBox(
@@ -63,8 +63,7 @@ class _AccountReviveDialogState extends State<AccountReviveDialog> {
   Widget reviveButtoBuild() {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.vertical(
-            top: Radius.elliptical(20.0, 0.0), bottom: Radius.circular(50.0)),
+        borderRadius: const BorderRadius.vertical(top: Radius.elliptical(20.0, 0.0), bottom: Radius.circular(50.0)),
         border: Border.all(color: ColorConstants.designGreen, width: 2),
       ),
       margin: const EdgeInsets.all(4.0),
@@ -72,10 +71,7 @@ class _AccountReviveDialogState extends State<AccountReviveDialog> {
       child: CupertinoButton(
         child: Text(
           "Scribo\n Ergo\n Sum",
-          style: TextStyle(
-              fontFamily: "Noscefont",
-              color: ColorConstants.designGreen,
-              fontSize: 10.sp),
+          style: TextStyle(fontFamily: "Noscefont", color: ColorConstants.designGreen, fontSize: 10.sp),
         ),
         onPressed: () async {
           showCupertinoDialog(
@@ -83,20 +79,16 @@ class _AccountReviveDialogState extends State<AccountReviveDialog> {
               context: context,
               builder: (context) => Dialog(
                     backgroundColor: CupertinoColors.black,
-                    shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.all(Radius.circular(200.sp))),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(200.sp))),
                     child: Image.asset(
                       'assets/images/matrix_world.gif',
                     ),
                   ));
 
-          var response = await FirestoreOperations.accountReviveRequest(
-              context.read<KmUserCubit>().state, t1.text);
+          var response = await FirestoreOperations.accountReviveRequest(context.read<KmUserCubit>().state, t1.text);
           await Future.delayed(const Duration(milliseconds: 3000), () async {});
           if (response) {
-            var userWithRevived = await FirestoreOperations.getKmUser(
-                context.read<KmUserCubit>().state.userUid);
+            var userWithRevived = await FirestoreOperations.getKmUser(context.read<KmUserCubit>().state.userUid);
 
             if (userWithRevived.userHasBanned == false) {
               context.read<KmUserCubit>().changeUser(userWithRevived);

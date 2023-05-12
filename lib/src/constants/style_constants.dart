@@ -91,6 +91,15 @@ class StyleConstants {
     height: 0.8,
   );
 
+  static var botMessageTextStyle = TextStyle(
+    color: ColorConstants.systemColor,
+    fontFamily: "CoderStyle",
+    fontSize: 17.sp,
+    letterSpacing: 0.5,
+    wordSpacing: 0.05,
+    height: 0.8,
+  );
+
   static var optionsXTextStyle = TextStyle(
     color: ColorConstants.designGreen,
     //fontFamily: "Nosce",

@@ -70,11 +70,11 @@ class AlertDialogs {
         barrierDismissible: true,
         context: context,
         builder: (BuildContext context) => CupertinoAlertDialog(
-              title: Text("ATTENTION"),
-              content: Text("Do you want to delete this chat?"),
+              title: const Text("ATTENTION"),
+              content: const Text("Do you want to clean this chat?"),
               actions: [
                 CupertinoButton(
-                  child: Text("Yes"),
+                  child: const Text("Yes"),
                   onPressed: () async {
                     Navigator.pop(context);
                     context.read<KmChatReferenceCubit>().goPublic(kmUser.userCoordinates, kmSystemSettings);
@@ -82,7 +82,7 @@ class AlertDialogs {
                   },
                 ),
                 CupertinoButton(
-                  child: Text("No"),
+                  child: const Text("No"),
                   onPressed: () {
                     Navigator.pop(context);
                   },

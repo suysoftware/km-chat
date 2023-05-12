@@ -11,12 +11,13 @@ import '../../../bloc/km_chat_reference.dart';
 import '../../../models/km_chat_reference_model.dart';
 
 class ChatTextField extends StatelessWidget {
-  final void Function(String, String, String,List<KmChatMessage> kmChatMessage) whiteRabbitButtonOperation;
+  final void Function(String, String, String, List<KmChatMessage> kmChatMessage) whiteRabbitButtonOperation;
   final void Function(String) textFieldOnChangeOperation;
   final FocusNode textFieldFocusNode;
   final TextEditingController messageController;
   final String privateTargetName;
   final List<KmChatMessage> kmChatMessage;
+  final bool isChat;
 
   const ChatTextField({
     Key? key,
@@ -26,6 +27,7 @@ class ChatTextField extends StatelessWidget {
     required this.messageController,
     required this.privateTargetName,
     required this.kmChatMessage,
+    required this.isChat,
   }) : super(key: key);
 
   @override
@@ -46,6 +48,7 @@ class ChatTextField extends StatelessWidget {
                   child: CupertinoTextField(
                     suffixMode: OverlayVisibilityMode.editing,
                     suffix: Padding(
+                      // ignore: prefer_const_constructors
                       padding: EdgeInsets.all(8.0),
                       child: Text(
                         "${(messageController.text.length - (privateTargetName.length))}/99",
@@ -75,8 +78,10 @@ class ChatTextField extends StatelessWidget {
                   flex: 1,
                   child: BlocBuilder<KmChatReferenceCubit, KmChatReferenceModel>(builder: (context, refBloc) {
                     return WhiteRabbitButton(whiteRabbitButtonOperation: () {
-                      whiteRabbitButtonOperation(refBloc.chatSectionEnum.name, refBloc.chatTargetName, refBloc.chatTargetNo,kmChatMessage);
-                    });
+
+       
+                      whiteRabbitButtonOperation(refBloc.chatSectionEnum.name, refBloc.chatTargetName, refBloc.chatTargetNo, kmChatMessage);
+                    },isChat:refBloc.chatSectionEnum.name!="bot"? true :isChat,isBot: refBloc.chatSectionEnum.name == "bot" ? true : false,);
                   }),
                 )
               ],

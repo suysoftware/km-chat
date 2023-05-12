@@ -8,8 +8,10 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:one_km/src/models/km_user.dart';
 
+// ignore: non_constant_identifier_names
 List<KmChatMessage> KmChatMessageFromJson(String str) => List<KmChatMessage>.from(json.decode(str).map((x) => KmChatMessage.fromJson(x)));
 
+// ignore: non_constant_identifier_names
 String KmChatMessageToJson(List<KmChatMessage> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class KmChatMessage {
@@ -35,8 +37,8 @@ class KmChatMessage {
   Map<String, dynamic> toJson() => {
         "user_message": userMessage,
         "user_message_time": userMessageTime.toDate().toIso8601String(),
-        "sender_user": senderUser.toJson(),
-        "reciever_user": recieverUser.toJson(),
+        "sender_user": kmUserToJson(senderUser) ,
+        "reciever_user": kmUserToJson(recieverUser),
       };
 
       
